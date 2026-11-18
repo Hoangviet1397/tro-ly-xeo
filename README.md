@@ -58,6 +58,13 @@ Gõ tới đâu tự lưu tới đó.
   mỗi tháng; một nút ghi khấu hao tháng này vào sổ (mỗi tháng ghi một lần).
 - **Chi cố định hằng tháng:** phần mềm, cloud, mặt bằng…; đầu tháng một nút ghi hết.
 - Cài đặt nằm chung trong bản sao lưu JSON; "Xoá dữ liệu" không xoá cài đặt.
+- **Instagram @ và giới thiệu ngắn:** dùng cho mục Ảnh của Xèo, chân trang và tin nhắn mẫu cho khách hỏi giá.
+
+## Ảnh trong app
+
+Ảnh đầu trang và mục **Ảnh của Xèo** là ảnh Xèo chụp, lấy từ Instagram
+[@xeonong](https://www.instagram.com/xeonong/) (bản 640px công khai), gắn thẳng vào `index.html`
+để mở offline được. Chạm vào ảnh là mở bài gốc trên Instagram.
 
 ## Thêm vào màn hình chính (dùng như app thật)
 
