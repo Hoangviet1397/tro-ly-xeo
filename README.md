@@ -68,6 +68,20 @@ Gõ tới đâu tự lưu tới đó.
 - Khi đang có dữ liệu mẫu, đầu trang Hôm nay có dải **"Đang xem dữ liệu mẫu"** với nút
   **Dùng thật — xoá dữ liệu mẫu** (hỏi lại trước; cài đặt giá, cọc, thiết bị giữ nguyên).
 
+## Xem Google Lịch ngay trong app (không cần file)
+
+- Tab **Buổi chụp** → nút **Lịch**: dòng thời gian 30 ngày tới, buổi chụp trong app và sự kiện Google Lịch
+  xếp chung theo ngày. Trang Hôm nay cũng hiện sự kiện Google của hôm nay.
+- Chạm sự kiện Google → **Thêm thành buổi chụp** (tự điền tên khách, loại, giờ, địa điểm, giá, hạn giao)
+  hoặc mở trong Google Lịch. Buổi đã thêm không hiện trùng.
+- Kết nối bằng đăng nhập Google, **chỉ quyền đọc lịch**, không qua máy chủ nào; mã đăng nhập chỉ nằm trên máy,
+  hết hạn sau ~1 giờ (bấm "Kết nối lại"). Lịch đã tải được lưu lại nên mất mạng vẫn xem.
+- Cần làm **một lần**: tạo Google Client ID (Google Cloud → bật Google Calendar API → màn hình xin quyền
+  chế độ Testing + thêm Gmail của Xèo làm test user → tạo OAuth client loại Web application với
+  origin `https://hoangviet1397.github.io` và redirect `https://hoangviet1397.github.io/tro-ly-xeo/`),
+  rồi dán vào Cài đặt → Google Lịch → Client ID. Hướng dẫn chi tiết có trong app (Cài đặt → Cách lấy Client ID).
+- Lịch iPhone (iCloud) không cho app web đọc thẳng — bật đồng bộ sang Google Lịch là xem được.
+
 ## Nạp buổi chụp từ lịch
 
 - Ở trang cuối màn chào mừng, đầu phần **Cài đặt**, hoặc Phòng ban → **Nạp buổi chụp từ lịch**.

@@ -543,8 +543,10 @@
       <!-- ============ BUỔI CHỤP ============ -->
       <section class="view" id="view-jobs" data-title="Buổi chụp">
         <div class="lt"><p class="eyebrow" id="jobsEyebrow">Buổi chụp</p><h1>Buổi chụp</h1></div>
+        <div class="seg" id="jobsSeg" style="margin-top:12px;"><button type="button" data-jm="list" class="on">Danh sách</button><button type="button" data-jm="cal">Lịch</button></div>
         <div class="pills" id="stageChips"></div>
         <div id="jobList" style="margin-top:14px;"></div>
+        <div id="calView" class="hidden" style="margin-top:14px;"></div>
 
         <div class="sec-h"><h2>Chuẩn bị đồ</h2><button class="link" type="button" id="checkReset">Làm mới</button></div>
         <div class="pills" id="checkTypeChips" style="margin-top:0;"></div>
@@ -750,7 +752,7 @@
       prices:{ Portrait:2500000, Couple:4000000, Wedding:15000000, Lookbook:8000000, Event:5000000 },
       extraHour:500000, extraLoc:700000, retouch:150000, album:2000000,
       depositPct:40, deliverDays:14,
-      equipment:[], fixed:[], checkExtra:{}, theme:'elf', fun:true, petals:true
+      equipment:[], fixed:[], checkExtra:{}, theme:'elf', fun:true, petals:true, gClientId:'', gCals:[]
     };
     function mergeCfg(c){
       var o = JSON.parse(JSON.stringify(DEFAULT_CFG));
@@ -765,6 +767,8 @@
       o.depositPct = Math.min(100, o.depositPct); o.deliverDays = Math.min(365, o.deliverDays);
       ['name','studio','instagram','tagline'].forEach(function(k){ o[k] = cleanStr(o[k], 80).trim() || DEFAULT_CFG[k]; });
       o.instagram = o.instagram.replace(/[^A-Za-z0-9._]/g, '') || DEFAULT_CFG.instagram;
+      o.gClientId = /^[\w.-]{10,200}\.apps\.googleusercontent\.com$/.test(String(o.gClientId || '').trim()) ? String(o.gClientId).trim() : '';
+      o.gCals = Array.isArray(o.gCals) ? o.gCals.map(function(x){ return cleanStr(x, 200); }).filter(Boolean).slice(0, 30) : [];
       o.theme = o.theme === 'rose' ? 'rose' : 'elf'; o.fun = o.fun !== false; o.petals = o.petals !== false;
       var ids = {}, next = 900000;
       function cid(v){ var id = /^\d{1,12}$/.test(String(v)) ? +v : null; if (id === null || ids[id]) id = ++next; ids[id] = 1; return id; }
@@ -1470,8 +1474,8 @@
 
     /* ---------- Form thêm / sửa buổi chụp ---------- */
     function frow(label, inner, cls){ return '<label class="frow' + (cls ? ' ' + cls : '') + '"><span>' + label + '</span>' + inner + '</label>'; }
-    function openJobForm(j){
-      var e = j || {client:'', type:'Portrait', stage:'Tư vấn', shootDate:'', shootTime:'', location:'', deadline:'', price:state.cfg.prices.Portrait || 0, email:'', fbLink:'', msLink:'', driveLink:'', note:''};
+    function openJobForm(j, pre){
+      var e = j || Object.assign({client:'', type:'Portrait', stage:'Tư vấn', shootDate:'', shootTime:'', location:'', deadline:'', price:state.cfg.prices.Portrait || 0, email:'', fbLink:'', msLink:'', driveLink:'', note:''}, pre || {});
       var opt = function(arr, cur){ return arr.map(function(x){ return '<option' + (x === cur ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join(''); };
       var body = '<form id="jobForm" autocomplete="off">' +
         '<div class="list" style="margin-top:8px;">' +
@@ -1501,7 +1505,7 @@
         var data = { client:g('client'), type:g('type'), stage:g('stage') || 'Tư vấn', shootDate:g('shootDate'), shootTime:g('shootTime'), location:g('location'),
           deadline:g('deadline'), price:moneyVal(f.elements.price), email:g('email'), fbLink:link(g('fbLink')), msLink:link(g('msLink')), driveLink:link(g('driveLink')), note:g('note') };
         if (j){ Object.keys(data).forEach(function(k){ j[k] = data[k]; }); toast('Đã lưu thay đổi'); }
-        else { data.id = nid(); state.jobs.unshift(data); toast('Đã thêm buổi chụp mới'); }
+        else { data.id = nid(); if (pre && pre.calUid) data.calUid = cleanStr(pre.calUid, 200); state.jobs.unshift(data); toast('Đã thêm buổi chụp mới'); }
         api.close(); renderAll();
         if (!j && jobFilter !== 'Tất cả' && jobFilter !== data.stage){ jobFilter = 'Tất cả'; renderJobs(); }
       }
@@ -2171,6 +2175,21 @@
       var money = function(path, label, v){ return frow(label, '<input data-cfg="' + path + '" data-money="1" inputmode="numeric" value="' + mv(v) + '" placeholder="0" />'); };
       var h = '<div class="jd-head"><span class="ic lg bg-gray">' + I('gear') + '</span><h2>Thông số của ' + esc(c.name) + '</h2><p>App dùng để tính giá, cọc, hạn giao và khấu hao</p></div>';
       h += '<p class="sec-s">Nạp dữ liệu</p><div class="list"><button type="button" class="row" id="cfgCal"><span class="ic bg-red">' + I('cal') + '</span><span class="txt"><span class="t1" style="display:block;">Nạp buổi chụp từ lịch</span><span class="t2" style="display:block;">File .ics hoặc .zip xuất từ Google Lịch</span></span>' + chevSvg() + '</button></div>';
+      var gt = typeof gToken === 'function' ? gToken() : null, gc = typeof gcal !== 'undefined' ? gcal : null;
+      h += '<p class="sec-s">Google Lịch — xem lịch không cần file</p><div class="list">' +
+        frow('Client ID', '<input data-cfg="gClientId" value="' + esc(c.gClientId) + '" placeholder="…apps.googleusercontent.com" autocapitalize="off" autocomplete="off" spellcheck="false" />') +
+        (c.gClientId ? (gt || gc
+          ? '<div class="row"><span class="ic bg-green">' + I('check', 2.6) + '</span><span class="txt"><span class="t1" style="display:block;">' + (gt ? 'Đang kết nối' : 'Đã kết nối (hết hạn, bấm Kết nối lại)') + '</span><span class="t2" style="display:block;">' + (gc ? gc.events.length + ' sự kiện · cập nhật ' + agoText(gc.fetchedAt) : 'Chưa tải lịch') + '</span></span><button type="button" class="btn tint sm" id="gConnRow2">' + (gt ? 'Làm mới' : 'Kết nối lại') + '</button></div>' +
+            '<button type="button" class="row center destr" id="gDisc">Ngắt kết nối Google Lịch</button>'
+          : '<button type="button" class="row act" id="gConnRow"><span class="ic bg-blue">' + I('cal') + '</span><span class="txt t1">Kết nối Google Lịch</span></button>') : '') +
+        '<button type="button" class="row" id="gGuideRow"><span class="ic bg-gray">' + I('doc') + '</span><span class="txt"><span class="t1" style="display:block;">Cách lấy Client ID</span><span class="t2" style="display:block;">Làm một lần, khoảng 10 phút, miễn phí</span></span>' + chevSvg() + '</button></div>';
+      if (gc && gc.cals && gc.cals.length){
+        var chosenIds = gChosen(gc.cals).map(function(x){ return x.id; });
+        h += '<p class="sec-s">Lịch hiển thị trong app</p><div class="list">' + gc.cals.map(function(cl){
+          return '<label class="row" style="cursor:pointer;"><span class="ic round" style="background:' + cl.color + '">' + I('cal') + '</span><span class="txt t1 clip">' + esc(cl.name) + '</span><input type="checkbox" class="switch" data-gcal="' + esc(cl.id) + '"' + (chosenIds.indexOf(cl.id) >= 0 ? ' checked' : '') + ' /></label>';
+        }).join('') + '</div>';
+      }
+      h += '<p class="sec-f">App chỉ xin quyền <b>đọc</b> lịch. Mã đăng nhập chỉ nằm trên máy này và tự hết hạn sau khoảng 1 giờ. Lịch đã tải được lưu lại để mất mạng vẫn xem.</p>';
       h += '<p class="sec-s">Thông tin</p><div class="list">' +
         frow('Tên gọi', '<input data-cfg="name" value="' + esc(c.name) + '" placeholder="Xèo" />') +
         frow('Tên studio', '<input data-cfg="studio" value="' + esc(c.studio) + '" placeholder="Sadako Photography" />') +
@@ -2220,6 +2239,7 @@
     function setCfg(path, raw, isMoney, isNum){
       var v = isMoney ? (+String(raw).replace(/\D/g, '') || 0) : (isNum ? Math.max(0, +raw || 0) : String(raw).trim());
       if (path === 'depositPct') v = Math.min(100, v);
+      if (path === 'gClientId') v = String(v).replace(/\s+/g, '');
       if (path === 'instagram') v = String(v).replace(/^@/, '').replace(/^https?:\/\/(www\.)?instagram\.com\//i, '').replace(/\/.*$/, '');
       if ((path === 'name' || path === 'studio' || path === 'instagram') && !v) v = DEFAULT_CFG[path];
       var p = path.split('.');
@@ -2238,6 +2258,22 @@
       $$('[data-fx]', b).forEach(function(x){ x.addEventListener('click', function(){ openCfgItem('fx', x.getAttribute('data-fx')); }); });
       $$('#themeSeg button', b).forEach(function(x){ x.addEventListener('click', function(){
         state.cfg.theme = x.getAttribute('data-th'); $$('#themeSeg button', b).forEach(function(y){ y.classList.toggle('on', y === x); }); renderAll();
+      }); });
+      var gcr = $('#gConnRow', b); if (gcr) gcr.addEventListener('click', function(){ gConnect(false); });
+      var gcr2 = $('#gConnRow2', b); if (gcr2) gcr2.addEventListener('click', function(){ if (gToken()) gFetch(true); else gConnect(true); });
+      var ggr = $('#gGuideRow', b); if (ggr) ggr.addEventListener('click', function(){ openGGuide(); });
+      var gds = $('#gDisc', b); if (gds) gds.addEventListener('click', function(){
+        actionSheet({ title:'Ngắt kết nối Google Lịch?', msg:'Xoá lịch đã lưu trên máy và thu hồi quyền đọc lịch. Buổi chụp đã thêm vẫn giữ nguyên.', actions:[{ label:'Ngắt kết nối', destructive:true, fn:function(){
+          var t = gToken(); if (t) fetch('https://oauth2.googleapis.com/revoke?token=' + encodeURIComponent(t), { method:'POST', headers:{ 'Content-Type':'application/x-www-form-urlencoded' } }).catch(function(){});
+          lsSet(GT_KEY, ''); lsSet(GC_KEY, ''); gcal = null; renderAll(); refreshSettings(); toast('Đã ngắt kết nối Google Lịch', 'del');
+        } }] });
+      });
+      $$('[data-gcal]', b).forEach(function(sw){ sw.addEventListener('change', function(){
+        if (!gcal) return;
+        var ids = (state.cfg.gCals && state.cfg.gCals.length) ? state.cfg.gCals.slice() : gChosen(gcal.cals).map(function(x){ return x.id; });
+        var id = sw.getAttribute('data-gcal'), at = ids.indexOf(id);
+        if (sw.checked && at < 0) ids.push(id); if (!sw.checked && at >= 0) ids.splice(at, 1);
+        state.cfg.gCals = ids; saveLocal(); if (gToken()) gFetch(false); else toast('Kết nối lại để tải lịch vừa chọn', 'warn');
       }); });
       var cc2 = $('#cfgCal', b); if (cc2) cc2.addEventListener('click', function(){ openCalImport(); });
       var ps2 = $('#petalSwitch', b); if (ps2) ps2.addEventListener('change', function(){ state.cfg.petals = ps2.checked; renderAll(); });
@@ -2724,6 +2760,194 @@
       }
     }
     $('#calRow').addEventListener('click', function(){ openCalImport(); });
+    </script>
+
+    <script>
+    /* ================= GOOGLE LỊCH: XEM TRỰC TIẾP TRONG APP, KHÔNG CẦN FILE =================
+       Đăng nhập Google (OAuth, chỉ quyền ĐỌC lịch) → gọi thẳng Google Calendar API từ trình duyệt.
+       Không máy chủ trung gian. Mã đăng nhập chỉ nằm trên máy này, tự hết hạn sau ~1 giờ.
+       Lịch tải về được lưu lại để mất mạng vẫn xem được. */
+    var G_SCOPE = 'https://www.googleapis.com/auth/calendar.readonly';
+    var GT_KEY = 'troLyXeo.gtoken', GC_KEY = 'troLyXeo.gcal', GS_KEY = 'troLyXeo.gstate';
+    var gcal = (function(){ try{ var d = JSON.parse(lsGet(GC_KEY) || 'null'); return d && Array.isArray(d.events) ? d : null; }catch(e){ return null; } })();
+    var gState = { loading:false, error:'' };
+    var jobsMode = 'list';
+    function gRedirectUri(){ return location.origin + location.pathname.replace(/index\.html$/, ''); }
+    function gToken(){ try{ var t = JSON.parse(lsGet(GT_KEY) || 'null'); return t && t.t && t.exp > Date.now() + 60000 ? t.t : null; }catch(e){ return null; } }
+    function gLinked(){ return !!(state.cfg.gClientId && (gToken() || gcal)); }
+    function gConnect(silent){
+      if (!state.cfg.gClientId){ toast('Dán Google Client ID trong Cài đặt trước nha', 'warn'); openSettings(); return; }
+      if (location.protocol !== 'https:' && location.hostname !== 'localhost'){ toast('Mở app bằng link GitHub Pages để kết nối Google Lịch', 'warn'); return; }
+      var nonce = Math.random().toString(36).slice(2) + Date.now().toString(36);
+      lsSet(GS_KEY, nonce);
+      var p = { client_id:state.cfg.gClientId, redirect_uri:gRedirectUri(), response_type:'token', scope:G_SCOPE, include_granted_scopes:'true', state:nonce };
+      if (silent) p.prompt = 'none';
+      location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + Object.keys(p).map(function(k){ return k + '=' + encodeURIComponent(p[k]); }).join('&');
+    }
+    /* Quay về từ trang đăng nhập Google */
+    (function(){
+      if (!/(^|[#&])(access_token|error)=/.test(location.hash)) return;
+      var q = {};
+      location.hash.slice(1).split('&').forEach(function(kv){ var i = kv.indexOf('='); if (i > 0){ try{ q[decodeURIComponent(kv.slice(0, i))] = decodeURIComponent(kv.slice(i + 1).replace(/\+/g, ' ')); }catch(e){} } });
+      history.replaceState(null, '', location.pathname + location.search);
+      var expect = lsGet(GS_KEY); lsSet(GS_KEY, '');
+      if (!q.state || q.state !== expect){ setTimeout(function(){ toast('Kết nối Google không hợp lệ, thử lại nha', 'warn'); }, 400); return; }
+      if (q.access_token){
+        lsSet(GT_KEY, JSON.stringify({ t:q.access_token, exp:Date.now() + (+q.expires_in || 3600) * 1000 }));
+        jobsMode = 'cal';
+        setTimeout(function(){ go('jobs'); renderAll(); gFetch(true); }, 300);
+      } else if (/interaction_required|login_required|consent_required/.test(q.error || '')) {
+        setTimeout(function(){ gConnect(false); }, 300);   /* kết nối nhanh không được → hỏi lại bình thường */
+      } else if (q.error === 'access_denied') {
+        setTimeout(function(){ toast('Chưa cho phép đọc lịch nên chưa kết nối được', 'warn'); }, 400);
+      } else {
+        setTimeout(function(){ toast('Google báo lỗi: ' + cleanStr(q.error, 60), 'warn'); }, 400);
+      }
+    })();
+    function gLocal(iso){ var d = new Date(iso); if (isNaN(d.getTime())) return null; return { date:d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()), time:pad2(d.getHours()) + ':' + pad2(d.getMinutes()) }; }
+    async function gApi(path){
+      var t = gToken(); if (!t) throw new Error('auth');
+      var r = await fetch('https://www.googleapis.com/calendar/v3' + path, { headers:{ Authorization:'Bearer ' + t } });
+      if (r.status === 401){ lsSet(GT_KEY, ''); throw new Error('auth'); }
+      if (!r.ok) throw new Error('lỗi ' + r.status);
+      return r.json();
+    }
+    function gChosen(cals){
+      var pick = state.cfg.gCals || [];
+      return pick.length ? cals.filter(function(c){ return pick.indexOf(c.id) >= 0; })
+                         : cals.filter(function(c){ return c.shown && !/holiday|#contacts@|#weather|addressbook/i.test(c.id); });
+    }
+    async function gFetch(manual){
+      if (!state.cfg.gClientId || gState.loading) return;
+      if (!gToken()){ renderCal(); return; }
+      gState.loading = true; gState.error = ''; renderCal();
+      try{
+        var list = await gApi('/users/me/calendarList?minAccessRole=reader&maxResults=50');
+        var cals = (list.items || []).filter(function(c){ return !c.deleted; }).map(function(c){
+          return { id:cleanStr(c.id, 200), name:cleanStr(c.summaryOverride || c.summary, 80) || 'Lịch', color:/^#[0-9a-f]{6}$/i.test(c.backgroundColor || '') ? c.backgroundColor : '#4285F4', primary:!!c.primary, shown:c.selected !== false };
+        });
+        var chosen = gChosen(cals), evs = [];
+        var tMin = parseD(dstr(-7)).toISOString(), tMax = parseD(dstr(62)).toISOString();
+        for (var i = 0; i < chosen.length && i < 12; i++){
+          var c = chosen[i];
+          var r = await gApi('/calendars/' + encodeURIComponent(c.id) + '/events?singleEvents=true&orderBy=startTime&maxResults=250&timeMin=' + encodeURIComponent(tMin) + '&timeMax=' + encodeURIComponent(tMax));
+          (r.items || []).forEach(function(e){
+            if (e.status === 'cancelled') return;
+            var s = e.start || {}, st = s.date ? { date:cleanDate(s.date), time:'' } : (s.dateTime ? gLocal(s.dateTime) : null);
+            if (!st || !st.date) return;
+            evs.push({ id:cleanStr(e.id, 200), uid:cleanStr(e.iCalUID, 200), cal:c.name, color:c.color, summary:cleanStr(e.summary, 200) || '(Không tiêu đề)',
+              location:cleanStr(e.location, 200), desc:cleanStr(e.description, 1500).replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s{3,}/g, '  ').trim(),
+              date:st.date, time:st.time, link:safeUrl(e.htmlLink), recurring:!!e.recurringEventId });
+          });
+        }
+        evs.sort(function(a, b){ return (a.date + (a.time || '00:00')) < (b.date + (b.time || '00:00')) ? -1 : 1; });
+        gcal = { fetchedAt:Date.now(), cals:cals, events:evs };
+        lsSet(GC_KEY, JSON.stringify(gcal));
+        if (manual) toast('Đã cập nhật ' + evs.length + ' sự kiện từ Google Lịch');
+      }catch(err){
+        if (err.message !== 'auth') gState.error = navigator.onLine === false ? 'Đang mất mạng — đang xem lịch đã lưu lần trước.' : 'Chưa tải được lịch (' + err.message + ').';
+      }
+      gState.loading = false; renderAll(); refreshSettings();
+    }
+    function gImported(e){ return state.jobs.some(function(j){ return j.calUid && (j.calUid === e.uid || j.calUid === e.id); }); }
+    function gEventsOn(date){ return gcal ? gcal.events.filter(function(e){ return e.date === date && !gImported(e); }) : []; }
+    function gEventById(id){ return gcal ? gcal.events.filter(function(e){ return e.id === id; })[0] : null; }
+    function gRow(e){
+      var sub = [e.time || 'Cả ngày', e.cal, e.location].filter(Boolean).join(' · ');
+      return '<button type="button" class="row" data-gev="' + esc(e.id) + '"><span class="ic round" style="background:' + e.color + '">' + I('cal') + '</span><span class="txt"><span class="t1 clip" style="display:block;">' + esc(e.summary) + '</span><span class="t2 clip" style="display:block;">' + esc(sub) + '</span></span><span class="tagp tg-blue">Google</span>' + I('chev').replace('<svg', '<svg class="chev"') + '</button>';
+    }
+    function gOpenEvent(id){
+      var e = gEventById(id); if (!e) return;
+      var acts = [{ label:'Thêm thành buổi chụp', fn:function(){
+        var type = guessType(e.summary + ' ' + e.desc);
+        openJobForm(null, { client:cleanClient(e.summary), type:type, stage:e.date < dstr(0) ? 'Đã chụp' : 'Sắp chụp', shootDate:e.date, shootTime:e.time,
+          location:e.location, price:state.cfg.prices[type] || 0, deadline:state.cfg.deliverDays > 0 ? addDays(e.date, +state.cfg.deliverDays) : '',
+          note:(e.desc ? e.desc.slice(0, 1200) + '\n' : '') + 'Từ Google Lịch: ' + e.summary, calUid:e.uid || e.id });
+      } }];
+      if (e.link) acts.push({ label:'Mở trong Google Lịch', fn:function(){ window.open(e.link, '_blank'); } });
+      actionSheet({ title:e.summary, msg:fmtHeaderDate(e.date) + (e.time ? ' · ' + e.time : ' · cả ngày') + ' · ' + e.cal + (e.location ? ' · ' + e.location : ''), actions:acts });
+    }
+    function bindGev(root){ $$('[data-gev]', root).forEach(function(b){ if (b._g) return; b._g = 1; b.addEventListener('click', function(){ gOpenEvent(b.getAttribute('data-gev')); }); }); }
+    function agoText(ts){ var m = Math.round((Date.now() - ts) / 60000); return m < 1 ? 'vừa xong' : (m < 60 ? m + ' phút trước' : (m < 1440 ? Math.round(m / 60) + ' giờ trước' : Math.round(m / 1440) + ' ngày trước')); }
+
+    /* Tab Buổi chụp → chế độ Lịch */
+    function renderCal(){
+      var box = $('#calView'); if (!box) return;
+      $$('#jobsSeg button').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-jm') === jobsMode); });
+      var showCal = jobsMode === 'cal';
+      box.classList.toggle('hidden', !showCal); $('#stageChips').classList.toggle('hidden', showCal); $('#jobList').classList.toggle('hidden', showCal);
+      if (!showCal) return;
+      var h = '', tok = gToken();
+      if (!state.cfg.gClientId || !gcal){
+        h += '<div class="list" style="padding:20px 16px 12px;text-align:center;"><span class="ic lg bg-blue" style="margin:0 auto 10px;">' + I('cal') + '</span>' +
+          '<div class="b" style="font-size:19px;">Xem Google Lịch ngay trong app</div>' +
+          '<p class="muted" style="font-size:15px;margin:6px 0 14px;">Kết nối một lần là thấy lịch hẹn chụp ở đây, không cần xuất file. App chỉ đọc lịch, không sửa gì.</p>' +
+          (state.cfg.gClientId ? '<button type="button" class="btn fill" id="gConnectBtn">' + (gState.loading ? 'Đang tải lịch…' : 'Kết nối Google Lịch') + '</button>' : '<button type="button" class="btn fill" id="gSetupBtn">Thiết lập kết nối (làm 1 lần)</button>') +
+          '<a class="btn plain" href="https://calendar.google.com/" target="_blank" rel="noopener">Mở Google Lịch</a></div>';
+      } else {
+        var st = gState.loading ? 'Đang tải lịch…' : ('Google Lịch · cập nhật ' + agoText(gcal.fetchedAt));
+        h += '<div class="list" style="padding:12px 14px;display:flex;align-items:center;gap:10px;"><span class="ic round bg-blue">' + I('cal') + '</span><div style="flex:1;min-width:0;"><div class="b" style="font-size:15px;">' + esc(st) + '</div>' +
+          (gState.error ? '<div class="red" style="font-size:13px;">' + esc(gState.error) + '</div>' : (!tok ? '<div class="muted" style="font-size:13px;">Kết nối đã hết hạn (Google chỉ cho giữ 1 giờ) — đang xem bản đã lưu.</div>' : '')) + '</div>' +
+          (tok ? '<button type="button" class="btn tint sm" id="gRefresh"' + (gState.loading ? ' disabled' : '') + '>Làm mới</button>' : '<button type="button" class="btn fill sm" id="gReconnect">Kết nối lại</button>') + '</div>';
+      }
+      /* dòng thời gian 30 ngày: buổi chụp trong app + sự kiện Google */
+      var days = [];
+      for (var k = 0; k <= 30; k++){
+        var d = dstr(k);
+        var js = state.jobs.filter(function(j){ return j.shootDate === d; }).sort(function(a, b){ return (a.shootTime || '') < (b.shootTime || '') ? -1 : 1; });
+        var gs = gEventsOn(d);
+        if (js.length || gs.length) days.push({ d:d, js:js, gs:gs });
+      }
+      if (!days.length) h += '<div class="list" style="margin-top:12px;"><div class="empty-row muted">30 ngày tới chưa có lịch nào.</div></div>';
+      days.forEach(function(x){
+        var items = x.js.map(function(j){ return { t:j.shootTime || '', html:jobRow(j) }; }).concat(x.gs.map(function(e){ return { t:e.time || '', html:gRow(e) }; }))
+          .sort(function(a, b){ return a.t < b.t ? -1 : (a.t > b.t ? 1 : 0); });
+        h += '<p class="sec-s">' + esc(fmtHeaderDate(x.d)) + '</p><div class="list">' + items.map(function(i){ return i.html; }).join('') + '</div>';
+      });
+      if (gcal && gcal.events.length) h += '<p class="sec-f">Sự kiện Google có nhãn “Google” — chạm vào để thêm thành buổi chụp. Buổi đã thêm sẽ không hiện trùng.</p>';
+      box.innerHTML = h;
+      bindRows(box); bindGev(box);
+      var b1 = $('#gConnectBtn', box); if (b1) b1.addEventListener('click', function(){ gConnect(false); });
+      var b2 = $('#gSetupBtn', box); if (b2) b2.addEventListener('click', function(){ openGGuide(); });
+      var b3 = $('#gRefresh', box); if (b3) b3.addEventListener('click', function(){ gFetch(true); });
+      var b4 = $('#gReconnect', box); if (b4) b4.addEventListener('click', function(){ gConnect(true); });
+    }
+    $$('#jobsSeg button').forEach(function(b){ b.addEventListener('click', function(){
+      jobsMode = b.getAttribute('data-jm'); renderCal();
+      if (jobsMode === 'cal' && gToken() && (!gcal || Date.now() - gcal.fetchedAt > 10 * 60000)) gFetch(false);
+    }); });
+    var _renderJobs = renderJobs;
+    renderJobs = function(){ _renderJobs(); renderCal(); };
+
+    /* Trang Hôm nay: thêm sự kiện Google Lịch của hôm nay */
+    var _renderHome = renderHome;
+    renderHome = function(){
+      _renderHome();
+      var evs = gEventsOn(dstr(0)); if (!evs.length) return;
+      var tl = $('#todayList'); if (tl.querySelector('.empty-row')) tl.innerHTML = '';
+      tl.insertAdjacentHTML('beforeend', evs.map(gRow).join('')); bindGev(tl);
+    };
+
+    /* Hướng dẫn lấy Client ID */
+    function openGGuide(){
+      var origin = location.origin, redir = gRedirectUri();
+      var step = function(n, title, sub){ return '<div class="row"><span class="ic round bg-blue ltr">' + n + '</span><span class="txt"><span class="t1 b" style="display:block;">' + title + '</span><span class="t2" style="display:block;">' + sub + '</span></span></div>'; };
+      var body = '<div class="jd-head"><span class="ic lg bg-blue">' + I('cal') + '</span><h2>Kết nối Google Lịch</h2><p>Làm một lần, khoảng 10 phút, miễn phí. Nên làm trên máy tính.</p></div>' +
+        '<p class="sec-s">Các bước</p><div class="list">' +
+        step(1, 'Mở Google Cloud', 'Vào console.cloud.google.com bằng Gmail của Xèo → tạo dự án mới, đặt tên “Tro Ly Xeo”.') +
+        step(2, 'Bật Google Calendar API', 'Menu “APIs &amp; Services” → “Library” → tìm “Google Calendar API” → Enable.') +
+        step(3, 'Màn hình xin quyền', 'Vào “Google Auth Platform” (hoặc “OAuth consent screen”) → Get started: tên app “Trợ lý Xèo”, email của Xèo, Audience chọn External. Giữ chế độ Testing và thêm Gmail của Xèo vào “Test users”.') +
+        step(4, 'Tạo Client ID', 'Mục “Clients” (hoặc “Credentials”) → Create client → loại “Web application”. Dán 2 địa chỉ bên dưới vào đúng ô.') +
+        step(5, 'Dán vào app', 'Copy Client ID (đuôi .apps.googleusercontent.com) → Cài đặt → Google Lịch → ô Client ID → Kết nối.') + '</div>' +
+        '<p class="sec-s">Authorized JavaScript origins</p><div class="list"><div class="row"><span class="txt t1" style="font-family:ui-monospace,Menlo,monospace;font-size:14px;word-break:break-all;">' + esc(origin) + '</span><button type="button" class="btn tint sm" data-copy="' + esc(origin) + '">Chép</button></div></div>' +
+        '<p class="sec-s">Authorized redirect URIs</p><div class="list"><div class="row"><span class="txt t1" style="font-family:ui-monospace,Menlo,monospace;font-size:14px;word-break:break-all;">' + esc(redir) + '</span><button type="button" class="btn tint sm" data-copy="' + esc(redir) + '">Chép</button></div></div>' +
+        '<p class="sec-s">Cần biết</p><div class="list"><div class="note-txt" style="font-size:15px;">• Lần đầu Google hiện “Google chưa xác minh ứng dụng này” vì app tự làm cho riêng Xèo — bấm “Tiếp tục”.\n• App chỉ xin quyền ĐỌC lịch, không sửa hay xoá gì.\n• Google chỉ cho giữ kết nối khoảng 1 giờ. Hết giờ thì bấm “Kết nối lại”, đang đăng nhập Google thì vài giây là xong. Lịch đã tải vẫn xem được, cả khi mất mạng.\n• Lịch iPhone (iCloud) không cho app web đọc thẳng: bật đồng bộ lịch iPhone sang Google là xem được ở đây.\n• Nếu đã cài app lên màn hình chính mà đăng nhập Google không quay lại app, mở link app bằng Safari để kết nối.</div></div>';
+      openSheet({ title:'Google Lịch', left:'Xong', tall:true, body:body, bind:function(api){
+        $$('[data-copy]', api.body).forEach(function(b){ b.addEventListener('click', function(){ copyText(b.getAttribute('data-copy'), 'Đã chép'); }); });
+      } });
+    }
+    renderAll();
+    if (gToken() && (!gcal || Date.now() - gcal.fetchedAt > 10 * 60000)) gFetch(false);
     </script>
 
     <script>
