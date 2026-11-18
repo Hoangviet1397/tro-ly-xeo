@@ -26,21 +26,39 @@ Mở app tại: https://hoangviet1397.github.io/tro-ly-xeo/
   Google Lịch, tạo lời nhắc, chép giờ đặt báo thức.
   App chỉ link qua các app đó, không đăng nhập hay đồng bộ tài khoản nào.
 
+## Giao diện bản 2.0
+
+Làm lại theo tinh thần app iPhone: chữ hệ thống, tiêu đề lớn, danh sách nhóm,
+thanh tab mờ ở dưới, tự đổi sáng/tối theo máy.
+
+- Mỗi buổi chụp là một dòng gọn; chạm vào là mở bảng chi tiết trượt từ dưới
+  lên (tiến độ, lịch, tiền, liên lạc, nhắc việc, Drive). Kéo xuống để đóng.
+- Thêm job / ghi thu chi bằng nút **＋** góc trên, mở bảng nhập riêng;
+  số tiền tự thêm dấu chấm, có nút chọn nhanh 500k / 1 / 2 / 5 triệu.
+- **Sửa được job** (bản cũ chỉ thêm và xoá được), có nút **lùi bước** khi
+  bấm nhầm tiến độ.
+- Xoá job, xoá khoản thu chi, xoá dữ liệu và mở bản sao lưu đều **hỏi lại
+  trước** — không còn bấm nhầm là mất.
+- Tab **Trợ lý** dạng tin nhắn; ô gõ có nút micro, gõ tay cũng ra lệnh được
+  ("chi makeup 2 triệu").
+- Dữ liệu cũ giữ nguyên: vẫn đọc khoá `troLyXeo.v1`, cùng định dạng sao lưu JSON.
+
 ## Thêm vào màn hình chính (dùng như app thật)
 
-Trong app, ngay trên màn hình **Hôm nay** có thẻ lớn **"Thêm vào màn hình
-chính"** — bấm nút đó là xong, không cần nhớ thao tác nào khác:
+Trong app, đầu màn hình **Hôm nay** có dải **"Cài lên màn hình chính"** với
+nút **Cài** — bấm nút đó là xong, không cần nhớ thao tác nào khác:
 
-- **Android / Chrome:** bấm nút trong thẻ là Chrome hỏi cài ngay, bấm
+- **Android / Chrome:** bấm **Cài** là Chrome hỏi cài ngay, bấm
   "Cài đặt" là xong, một chạm thôi.
-- **iPhone / Safari:** bấm nút trong thẻ, app hiện từng bước chữ to:
+- **iPhone / Safari:** bấm **Cài**, app mở bảng hướng dẫn từng bước:
   1. Mở app này bằng **Safari** (đừng mở trong Facebook hay Messenger).
   2. Bấm nút **Chia sẻ** ở dưới màn hình — hình vuông có mũi tên đi lên.
   3. Kéo xuống, bấm **"Thêm vào Màn hình chính"**.
   4. Bấm **"Thêm"** ở góc trên bên phải. Từ đó bấm icon Trợ lý Xèo trên
      màn hình chính là vào app, không cần mở trình duyệt nữa.
-- Nút **"Đã thêm rồi, ẩn đi"** để ẩn thẻ này sau khi đã cài xong.
-- Đã cài rồi mở app từ màn hình chính thì thẻ này tự ẩn luôn.
+- Nút **✕** (hoặc "Đã thêm rồi, ẩn gợi ý này" trong bảng hướng dẫn) để ẩn
+  dải này sau khi đã cài xong.
+- Đã cài rồi mở app từ màn hình chính thì dải này tự ẩn luôn.
 
 App trên GitHub Pages là PWA: mở lần đầu bằng Safari/Chrome, service worker
 lưu app vào máy để mở offline những lần sau. Bản file `index.html` tải về

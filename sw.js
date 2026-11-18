@@ -1,8 +1,8 @@
 /* Service worker cho Trợ lý Xèo trên GitHub Pages (https).
    Chỉ lưu app vào máy để mở offline sau lần đầu.
    Không đăng ký khi mở file offline (file://) — xem index.html. */
-var CACHE = 'tro-ly-xeo-v1';
-var ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
+var CACHE = 'tro-ly-xeo-v2';
+var ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', function (event) {
   event.waitUntil(
@@ -17,7 +17,8 @@ self.addEventListener('install', function (event) {
 self.addEventListener('activate', function (event) {
   event.waitUntil(
     caches.keys().then(function (keys) {
-      return Promise.all(keys.filter(function (k) { return k !== CACHE; }).map(function (k) {
+      return Promise.all(keys.filter(function (k) { /* chỉ dọn cache cũ của chính app này — tên miền github.io dùng chung với app khác */
+        return k.indexOf('tro-ly-xeo-') === 0 && k !== CACHE; }).map(function (k) {
         return caches.delete(k);
       }));
     }).then(function () { return self.clients.claim(); })
