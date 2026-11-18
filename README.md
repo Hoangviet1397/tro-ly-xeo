@@ -68,6 +68,21 @@ Gõ tới đâu tự lưu tới đó.
 - Khi đang có dữ liệu mẫu, đầu trang Hôm nay có dải **"Đang xem dữ liệu mẫu"** với nút
   **Dùng thật — xoá dữ liệu mẫu** (hỏi lại trước; cài đặt giá, cọc, thiết bị giữ nguyên).
 
+## Nạp buổi chụp từ lịch
+
+- Ở trang cuối màn chào mừng, đầu phần **Cài đặt**, hoặc Phòng ban → **Nạp buổi chụp từ lịch**.
+- App web không được đọc thẳng lịch trên điện thoại, nên nạp bằng file: Google Lịch trên máy tính →
+  Cài đặt → Nhập & xuất → **Xuất** ra file .zip, chọn thẳng file .zip đó (app tự giải nén) hoặc file .ics.
+- App hiện danh sách sự kiện để tick chọn (lọc Sắp tới / Từ 2 tháng trước / Tất cả), tự đoán loại chụp
+  theo tên (cưới, couple, lookbook, chân dung, sự kiện), điền giá + hạn giao theo Cài đặt, bỏ sự kiện
+  đã huỷ, không chọn sẵn sự kiện lặp lại, và đánh dấu "Đã có" những buổi đã nạp rồi.
+- Đang có dữ liệu mẫu thì có công tắc xoá dữ liệu mẫu trước khi nạp.
+
+## Thao tác
+
+Chỉ chạm và vuốt dọc: không chụm/chạm đúp để phóng to, không có hàng nào phải kéo ngang
+(nút lọc xuống dòng, ảnh xếp lưới). Màn chào mừng lật trang bằng vuốt trái/phải hoặc chạm chấm tròn.
+
 ## Vui mỗi ngày (E.L.F. mode)
 
 - **Hoa cánh bướm bay khắp app:** vài cánh hoa và bông nhỏ trôi nhẹ trên nền; chạm nút / dòng nào là
