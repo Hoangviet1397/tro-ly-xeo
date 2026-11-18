@@ -133,6 +133,10 @@
       .tg-red{ background:color-mix(in srgb, var(--red) 15%, transparent); color:var(--red); }
       .tg-blue{ background:color-mix(in srgb, var(--blue) 15%, transparent); color:var(--blue); }
 
+      @supports not (color: color-mix(in srgb, red 50%, transparent)){
+        .tg-orange{ background:rgba(194,125,18,.16); } .tg-purple{ background:rgba(138,92,194,.16); } .tg-green{ background:rgba(62,138,71,.16); }
+        .tg-red{ background:rgba(208,68,58,.15); } .tg-blue{ background:rgba(47,121,201,.15); }
+      }
       /* ---------- Ô số liệu ---------- */
       .tiles{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px; }
       .tile{ background:var(--surface); border-radius:16px; padding:13px 14px 12px; min-height:94px; text-align:left; border:0;
@@ -381,7 +385,7 @@
       @keyframes sway{ 50%{ transform:rotate(-3deg); } }
       .fl{ transform-box:fill-box; transform-origin:center; animation:bloom 1s cubic-bezier(.2,1.4,.4,1) both; }
       @keyframes bloom{ from{ transform:scale(.1) rotate(-70deg); opacity:0; } to{ transform:none; opacity:1; } }
-      .sample-bn{ margin-top:16px; padding:14px 16px 16px; box-shadow:0 0 0 1.5px color-mix(in srgb, var(--orange) 45%, transparent); }
+      .sample-bn{ margin-top:16px; padding:14px 16px 16px; box-shadow:0 0 0 1.5px rgba(194,125,18,.45); box-shadow:0 0 0 1.5px color-mix(in srgb, var(--orange) 45%, transparent); }
       .sample-bn .b{ margin:9px 0 2px; font-size:17px; }
       .sample-bn .t2{ font-size:14px; margin-bottom:12px; line-height:1.4; }
       /* ---------- Màn chào mừng ---------- */
@@ -729,6 +733,20 @@
           else if (c[k] !== undefined && k !== 'prices') o[k] = c[k];
         });
       }
+      ['extraHour','extraLoc','retouch','album','depositPct','deliverDays'].forEach(function(k){ o[k] = cleanNum(o[k]); });
+      o.depositPct = Math.min(100, o.depositPct); o.deliverDays = Math.min(365, o.deliverDays);
+      ['name','studio','instagram','tagline'].forEach(function(k){ o[k] = cleanStr(o[k], 80).trim() || DEFAULT_CFG[k]; });
+      o.instagram = o.instagram.replace(/[^A-Za-z0-9._]/g, '') || DEFAULT_CFG.instagram;
+      o.theme = o.theme === 'rose' ? 'rose' : 'elf'; o.fun = o.fun !== false; o.petals = o.petals !== false;
+      var ids = {}, next = 900000;
+      function cid(v){ var id = /^\d{1,12}$/.test(String(v)) ? +v : null; if (id === null || ids[id]) id = ++next; ids[id] = 1; return id; }
+      o.equipment = (Array.isArray(o.equipment) ? o.equipment : []).filter(function(e){ return e && typeof e === 'object'; })
+        .map(function(e){ return { id:cid(e.id), name:cleanStr(e.name, 80) || 'Thiết bị', price:cleanNum(e.price), years:Math.max(1, Math.min(30, cleanNum(e.years) || 1)) }; });
+      o.fixed = (Array.isArray(o.fixed) ? o.fixed : []).filter(function(f){ return f && typeof f === 'object'; })
+        .map(function(f){ return { id:cid(f.id), name:cleanStr(f.name, 80) || 'Chi cố định', category:CHI_CATS.indexOf(f.category) >= 0 ? f.category : 'Phát sinh khác', amount:cleanNum(f.amount) }; });
+      var ce = {}; if (o.checkExtra && typeof o.checkExtra === 'object') Object.keys(o.checkExtra).forEach(function(t){
+        if (Array.isArray(o.checkExtra[t])) ce[t] = o.checkExtra[t].map(function(s){ return cleanStr(s, 120).trim(); }).filter(Boolean);
+      }); o.checkExtra = ce;
       return o;
     }
     state.cfg = mergeCfg(null);
@@ -760,6 +778,43 @@
       uid = 100;
     }
 
+    /* ================= LÀM SẠCH DỮ LIỆU =================
+       Dữ liệu đọc từ máy hoặc từ file sao lưu có thể cũ / sai kiểu / bị sửa tay.
+       Ép đúng kiểu trước khi dùng để không cộng nhầm chuỗi, không hiện "Invalid Date",
+       không để mã lạ lọt vào thuộc tính HTML. */
+    function cleanNum(v){ v = +v; return isFinite(v) && v > 0 ? Math.round(v) : 0; }
+    function cleanDate(v){ return /^\d{4}-\d{2}-\d{2}$/.test(v || '') && !isNaN(new Date(v).getTime()) ? v : ''; }
+    function cleanTime(v){ return /^\d{2}:\d{2}$/.test(v || '') ? v : ''; }
+    function cleanStr(v, max){ return v == null ? '' : String(v).slice(0, max || 500); }
+    function cleanId(v){ return /^\d{1,12}$/.test(String(v)) ? +v : null; }
+    function safeUrl(u){
+      u = String(u || '').trim(); if (!u) return '';
+      if (/^https?:\/\//i.test(u)) return u;
+      if (/^[a-z][a-z0-9+.-]*:/i.test(u)) return '';   /* chặn javascript:, data:, … */
+      return 'https://' + u.replace(/^\/+/, '');
+    }
+    function cleanData(d){
+      var used = {}, maxId = 100, pending = [];
+      function takeId(v, obj){ var id = cleanId(v); if (id === null || used[id]){ pending.push(obj); return null; } used[id] = 1; if (id > maxId) maxId = id; return id; }
+      var jobs = (Array.isArray(d.jobs) ? d.jobs : []).filter(function(x){ return x && typeof x === 'object'; }).map(function(j){
+        var o = { client:cleanStr(j.client, 120).trim() || 'Khách chưa đặt tên', type:TYPES.indexOf(j.type) >= 0 ? j.type : 'Khác',
+          stage:STAGES.indexOf(j.stage) >= 0 ? j.stage : 'Tư vấn', shootDate:cleanDate(j.shootDate), shootTime:cleanTime(j.shootTime),
+          location:cleanStr(j.location, 200), deadline:cleanDate(j.deadline), price:cleanNum(j.price), email:cleanStr(j.email, 200),
+          fbLink:safeUrl(j.fbLink), msLink:safeUrl(j.msLink), driveLink:safeUrl(j.driveLink), note:cleanStr(j.note, 3000) };
+        o.id = takeId(j.id, o); return o;
+      });
+      var jobIds = {}; jobs.forEach(function(j){ if (j.id !== null) jobIds[j.id] = 1; });
+      var txs = (Array.isArray(d.txs) ? d.txs : []).filter(function(x){ return x && typeof x === 'object' && cleanNum(x.amount) > 0; }).map(function(t){
+        var kind = t.kind === 'chi' ? 'chi' : 'thu', jid = cleanId(t.jobId);
+        var o = { kind:kind, category:cleanStr(t.category, 80) || (kind === 'chi' ? 'Phát sinh khác' : 'Thu khác'), jobId:jid !== null && jobIds[jid] ? jid : '',
+          amount:cleanNum(t.amount), date:cleanDate(t.date) || dstr(0), method:cleanStr(t.method, 40) || 'Chuyển khoản', note:cleanStr(t.note, 500) };
+        o.id = takeId(t.id, o); return o;
+      });
+      pending.forEach(function(o){ o.id = ++maxId; });
+      return { jobs:jobs, txs:txs, maxId:maxId };
+    }
+    function cfgMaxId(c){ var m = 0; (c.equipment || []).concat(c.fixed || []).forEach(function(x){ if (+x.id > m) m = +x.id; }); return m; }
+
     /* ================= LƯU TỰ ĐỘNG TRÊN MÁY (localStorage) =================
        Giữ nguyên khoá 'troLyXeo.v1' và cấu trúc dữ liệu của bản 1.0,
        nên dữ liệu Xèo đã nhập vẫn mở được ở bản 2.0. */
@@ -777,10 +832,11 @@
         var raw = localStorage.getItem(LS_KEY); if (!raw) return false;
         var d = JSON.parse(raw);
         if (!d || !Array.isArray(d.jobs) || !Array.isArray(d.txs)) return false;
-        state.jobs = d.jobs; state.txs = d.txs; state.sample = !!d.sample; state.cfg = mergeCfg(d.cfg);
-        if (d.checkDone && typeof d.checkDone === 'object'){ checkDone = d.checkDone; }
-        var m = 100; state.jobs.forEach(function(j){ if (+j.id > m) m = +j.id; }); state.txs.forEach(function(x){ if (+x.id > m) m = +x.id; });
-        uid = (typeof d.uid === 'number' && d.uid > m) ? d.uid : m;
+        var cd = cleanData(d);
+        state.jobs = cd.jobs; state.txs = cd.txs; state.sample = !!d.sample; state.cfg = mergeCfg(d.cfg);
+        if (d.checkDone && typeof d.checkDone === 'object' && !Array.isArray(d.checkDone)){ checkDone = d.checkDone; }
+        var m = Math.max(cd.maxId, cfgMaxId(state.cfg));
+        uid = (typeof d.uid === 'number' && isFinite(d.uid) && d.uid > m && d.uid < 1e12) ? Math.floor(d.uid) : m;
         return true;
       }catch(e){ return false; }
     }
@@ -802,7 +858,7 @@
     function fmt(n){ return Math.round(n).toLocaleString('vi-VN') + '₫'; }
     function fmtParts(n){
       var a = Math.abs(n), s = n < 0 ? '−' : '';
-      if (a >= 1000000){ var v = Math.round(a/100000)/10; return {num:s + String(v).replace('.', ','), unit:'triệu'}; }
+      if (a >= 999500){ var v = Math.round(a/100000)/10; return {num:s + String(v).replace('.', ','), unit:'triệu'}; }
       if (a >= 1000) return {num:s + Math.round(a/1000), unit:'nghìn'};
       return {num:s + a, unit:'đồng'};
     }
@@ -1215,11 +1271,12 @@
       var e = new Date(+p[0], +p[1]-1, +p[2], +(t[0]||8) + 2, +(t[1]||0));
       return e.getFullYear() + pad2(e.getMonth()+1) + pad2(e.getDate()) + 'T' + pad2(e.getHours()) + pad2(e.getMinutes()) + '00';
     }
+    function icsEsc(s){ return String(s || '').replace(/\\/g, '\\\\').replace(/\r?\n/g, '\\n').replace(/,/g, '\\,').replace(/;/g, '\\;'); }
     function downloadICS(j){
       var ics = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Tro Ly Xeo//VI','BEGIN:VEVENT',
         'UID:job-' + j.id + '@trolyxeo','DTSTART:' + icsDate(j.shootDate, j.shootTime),'DTEND:' + icsEnd(j),
-        'SUMMARY:Chụp ' + j.type + ' — ' + j.client,
-        'LOCATION:' + (j.location || ''),'DESCRIPTION:' + (j.note || 'Buổi chụp của ' + state.cfg.studio),
+        'SUMMARY:' + icsEsc('Chụp ' + j.type + ' — ' + j.client),
+        'LOCATION:' + icsEsc(j.location || ''),'DESCRIPTION:' + icsEsc(j.note || 'Buổi chụp của ' + state.cfg.studio),
         'BEGIN:VALARM','TRIGGER:-PT12H','ACTION:DISPLAY','DESCRIPTION:Nhắc chuẩn bị buổi chụp','END:VALARM',
         'END:VEVENT','END:VCALENDAR'].join('\r\n');
       var a = document.createElement('a');
@@ -1329,7 +1386,7 @@
           $$('[data-act]', api.body).forEach(function(b){ b.addEventListener('click', function(){ jobAction(b.getAttribute('data-act'), id); }); });
           var g = $('[data-gcal]', api.body); if (g) g.addEventListener('click', function(e){ if (!jobById(id).shootDate){ e.preventDefault(); toast('Job này chưa có ngày chụp', 'warn'); } });
           var di = $('#driveInp', api.body);
-          if (di) di.addEventListener('change', function(){ var jj = jobById(id); if (!jj) return; jj.driveLink = di.value.trim(); saveLocal(); toast('Đã lưu link Drive'); });
+          if (di) di.addEventListener('change', function(){ var jj = jobById(id); if (!jj) return; var raw = di.value.trim(); jj.driveLink = safeUrl(raw); di.value = jj.driveLink; saveLocal(); toast(!raw || jj.driveLink ? 'Đã lưu link Drive' : 'Link này không mở được, dán link https:// nha', !raw || jj.driveLink ? '' : 'warn'); });
         },
         onClose:function(){ jobSheet = null; }
       });
@@ -1353,12 +1410,13 @@
           actions:[{label:'Xoá buổi chụp', destructive:true, fn:function(){
             state.jobs = state.jobs.filter(function(x){ return String(x.id) !== String(id); });
             state.txs = state.txs.filter(function(t){ return String(t.jobId) !== String(id); });
+            delete checkDone['job:' + id]; if (checkSel === 'job:' + id){ checkSel = null; checkPinned = false; }
             if (jobSheet) jobSheet.close(); toast('Đã xoá buổi chụp', 'del'); renderAll();
           }}] });
       }
       if (act === 'addtx'){ openTxForm({jobId:id, kind: jobOwe(j) > 0 ? 'thu' : 'chi'}); }
-      if (act === 'msgr'){ copyText(msgFor(j), 'Đã chép tin nhắn — qua Messenger Dán rồi Gửi'); window.open(j.msLink || 'https://m.me/', '_blank'); }
-      if (act === 'fb'){ copyText(msgFor(j), 'Đã chép tin nhắn — qua Facebook Dán rồi Gửi'); window.open(j.fbLink || 'https://www.facebook.com/', '_blank'); }
+      if (act === 'msgr'){ copyText(msgFor(j), 'Đã chép tin nhắn — qua Messenger Dán rồi Gửi'); window.open(safeUrl(j.msLink) || 'https://m.me/', '_blank'); }
+      if (act === 'fb'){ copyText(msgFor(j), 'Đã chép tin nhắn — qua Facebook Dán rồi Gửi'); window.open(safeUrl(j.fbLink) || 'https://www.facebook.com/', '_blank'); }
       if (act === 'copymsg'){ copyText(msgFor(j), 'Đã chép tin nhắn mẫu'); }
       if (act === 'mail'){
         if (!j.email){ toast('Chưa có email khách — bấm Sửa để thêm', 'warn'); return; }
@@ -1367,8 +1425,8 @@
         document.body.appendChild(ma); ma.click(); ma.remove();
       }
       if (act === 'drive'){
-        var di = document.getElementById('driveInp'); if (di && di.value.trim() !== (j.driveLink || '')){ j.driveLink = di.value.trim(); saveLocal(); }
-        if (j.driveLink) window.open(j.driveLink, '_blank'); else { toast('Dán link Drive vào ô phía trên trước nha', 'warn'); if (di) di.focus(); }
+        var di = document.getElementById('driveInp'); if (di && di.value.trim() !== (j.driveLink || '')){ j.driveLink = safeUrl(di.value); saveLocal(); }
+        if (j.driveLink && safeUrl(j.driveLink)) window.open(safeUrl(j.driveLink), '_blank'); else { toast('Dán link Drive vào ô phía trên trước nha', 'warn'); if (di) di.focus(); }
       }
       if (act === 'ics'){ if (!j.shootDate){ toast('Job này chưa có ngày chụp', 'warn'); return; } downloadICS(j); }
       if (act === 'remind'){
@@ -1411,7 +1469,7 @@
       function save(api){
         var f = $('#jobForm', api.body), g = function(n){ return f.elements[n].value.trim(); };
         if (!g('client')){ var r = $('.frow.req', f); r.classList.add('invalid'); f.elements.client.focus(); api.el.classList.remove('shake'); void api.el.offsetWidth; api.el.classList.add('shake'); toast('Nhập tên khách trước nha', 'warn'); return; }
-        var link = function(v){ return v && !/^[a-z]+:/i.test(v) ? 'https://' + v : v; };
+        var link = safeUrl;
         var data = { client:g('client'), type:g('type'), stage:g('stage') || 'Tư vấn', shootDate:g('shootDate'), shootTime:g('shootTime'), location:g('location'),
           deadline:g('deadline'), price:moneyVal(f.elements.price), email:g('email'), fbLink:link(g('fbLink')), msLink:link(g('msLink')), driveLink:link(g('driveLink')), note:g('note') };
         if (j){ Object.keys(data).forEach(function(k){ j[k] = data[k]; }); toast('Đã lưu thay đổi'); }
@@ -1447,6 +1505,7 @@
       'Lookbook': ['Shot list từ shop đã in / lưu sẵn','Mẫu + makeup đã xác nhận giờ','Phông nền / studio đã đặt','Đèn studio + tản sáng','Sản phẩm đã ủi phẳng, đánh số thứ tự','Bàn là hơi / cây lăn bụi','Thỏa thuận số ảnh giao + hạn giao','Cọc đã nhận — kiểm tra trong tab Tiền bạc']
     };
     var checkSel = null;   /* 'job:<id>' = riêng một buổi chụp, 'type:<Loại>' = danh sách chung */
+    var checkPinned = false; /* true khi Xèo tự bấm chọn; không thì luôn tự chọn buổi chụp gần nhất */
     function shortName(s){ s = String(s).split(/s*[&,]s*/)[0]; return s.length > 16 ? s.slice(0, 15) + "…" : s; }
     function listType(t){ return CHECKLISTS[t] ? t : 'Portrait'; }
     function checkItems(t){ return CHECKLISTS[t].concat((state.cfg.checkExtra && state.cfg.checkExtra[t]) || []); }
@@ -1466,11 +1525,11 @@
     }
     function checkContext(){
       var up = upcomingShoots();
-      if (checkSel && checkSel.indexOf('job:') === 0){
+      if (checkPinned && checkSel && checkSel.indexOf('job:') === 0){
         var j = jobById(checkSel.slice(4));
-        if (!j) checkSel = null; else return {key:checkSel, job:j, type:listType(j.type), up:up};
+        if (!j){ checkSel = null; checkPinned = false; } else return {key:checkSel, job:j, type:listType(j.type), up:up};
       }
-      if (!checkSel) checkSel = up.length ? 'job:' + up[0].id : 'type:Portrait';
+      if (!checkSel || !checkPinned) checkSel = up.length ? 'job:' + up[0].id : (checkSel && checkSel.indexOf('type:') === 0 ? checkSel : 'type:Portrait');
       if (checkSel.indexOf('job:') === 0){ var jj = jobById(checkSel.slice(4)); return {key:checkSel, job:jj, type:listType(jj.type), up:up}; }
       return {key:checkSel, job:null, type:checkSel.slice(5), up:up};
     }
@@ -1484,7 +1543,7 @@
         var isJob = p.key.indexOf('job:') === 0;
         return '<button type="button" class="pill' + (p.key === c.key ? ' on' : '') + '" data-cs="' + esc(p.key) + '">' + (isJob ? I('cam') .replace('<svg', '<svg style="width:15px;height:15px;"') : '') + esc(p.label) + '</button>';
       }).join('');
-      $$('#checkTypeChips .pill').forEach(function(b){ b.addEventListener('click', function(){ checkSel = b.getAttribute('data-cs'); renderChecklist(); }); });
+      $$('#checkTypeChips .pill').forEach(function(b){ b.addEventListener('click', function(){ checkSel = b.getAttribute('data-cs'); checkPinned = true; renderChecklist(); }); });
       var nDone = items.filter(function(it){ return done[it]; }).length;
       $('#checkTitle').textContent = c.job ? c.job.client + ' · ' + c.type : 'Danh sách chung · ' + c.type;
       $('#checkBar').style.width = Math.round(nDone / items.length * 100) + '%';
@@ -1513,7 +1572,7 @@
       }); });
       $('#checkAdd').addEventListener('click', function(){
         openSheet({ title:'Thêm món', left:'Huỷ', right:'Thêm', body:'<form id="ckAddForm" autocomplete="off"><div class="list" style="margin-top:8px;"><label class="frow full"><input name="item" placeholder="VD: Quạt cầm tay, kẹp tóc, ô che nắng…" /></label></div><p class="sec-f">Món mới thêm vào danh sách ' + esc(c.type) + ', dùng cho mọi buổi chụp ' + esc(c.type) + ' sau này.</p></form>',
-          onRight:function(api){ $('#ckAddForm', api.body).requestSubmit(); },
+          onRight:function(api){ $('#ckAddForm', api.body).dispatchEvent(new Event('submit', {cancelable:true})); },
           bind:function(api){
             var f = $('#ckAddForm', api.body);
             f.addEventListener('submit', function(ev){
@@ -2030,7 +2089,7 @@
           var d = JSON.parse(r.result);
           if (!(Array.isArray(d.jobs) && Array.isArray(d.txs))){ toast('File này không giống bản sao lưu của Trợ lý Xèo', 'warn'); return; }
           actionSheet({ title:'Mở bản sao lưu?', msg:'Bản sao lưu có ' + d.jobs.length + ' buổi chụp và ' + d.txs.length + ' khoản thu chi. Dữ liệu đang có trên máy sẽ được thay bằng bản này.',
-            actions:[{label:'Thay bằng bản sao lưu', destructive:true, fn:function(){ state.jobs = d.jobs; state.txs = d.txs; if (d.cfg) state.cfg = mergeCfg(d.cfg); state.sample = false; renderAll(); toast('Đã mở lại bản sao lưu'); }}] });
+            actions:[{label:'Thay bằng bản sao lưu', destructive:true, fn:function(){ var cd = cleanData(d); state.jobs = cd.jobs; state.txs = cd.txs; if (d.cfg) state.cfg = mergeCfg(d.cfg); state.sample = false; uid = Math.max(uid, cd.maxId, cfgMaxId(state.cfg)); checkDone = {}; checkSel = null; renderAll(); toast('Đã mở lại bản sao lưu'); }}] });
         }catch(err){ toast('Chưa đọc được file này, Xèo thử lại nha', 'warn'); }
       };
       r.readAsText(file);
@@ -2286,7 +2345,7 @@
     function startReal(){
       state.jobs = []; state.txs = []; state.sample = false;
       Object.keys(checkDone).forEach(function(k){ if (k.indexOf('job:') === 0) delete checkDone[k]; });
-      checkSel = null; renderAll();
+      checkSel = null; checkPinned = false; renderAll();
     }
     function askStartReal(){
       actionSheet({ title:'Bắt đầu dùng thật?', msg:'Xoá ' + state.jobs.length + ' buổi chụp và ' + state.txs.length + ' khoản thu chi mẫu. Cài đặt giá, cọc, thiết bị vẫn giữ nguyên.',
