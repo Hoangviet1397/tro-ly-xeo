@@ -66,6 +66,10 @@ Gõ tới đâu tự lưu tới đó.
   bấm "Câu khác" hoặc chạm sticker để đổi, "Chép gửi bạn" để gửi.
 - **Sticker E.L.F. tự vẽ** (nhân vật tròn màu Pearl Sapphire Blue: vương miện, lightstick, máy ảnh,
   tim, mũ tiệc, ngủ). Không dùng ảnh hay sticker chính thức của nhóm vì vướng bản quyền.
+- **Chibi 9 thành viên Super Junior** (tự vẽ bằng SVG, không phải chân dung): Leeteuk (hào quang, cánh),
+  Heechul (gương), Yesung (rùa), Shindong (kính râm, máy quay), Eunhyuk (sữa dâu), Donghae (cá),
+  Siwon (cà vạt, nụ cười lấp lánh), Ryeowook (mũ đầu bếp), Kyuhyun (tay cầm game).
+  Có ở câu nói hôm nay, khung chat, ăn mừng, và **Góc E.L.F.** trong tab Phòng ban (chạm vào ai người đó nói một câu).
 - Sticker bật lên ăn mừng khi chuẩn bị đủ đồ, giao ảnh, xong job, khách trả đủ tiền.
 - Hỏi trợ lý về Suju (tên thành viên, "suju", "E.L.F.") là được trả lời vui.
 - Cài đặt → Giao diện: chọn màu **Pearl Sapphire Blue** (mặc định) hoặc **Hồng đất**,

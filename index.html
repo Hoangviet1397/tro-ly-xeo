@@ -357,6 +357,13 @@
       .stk-pop svg{ width:150px; height:150px; margin:0 auto; filter:drop-shadow(0 10px 24px rgba(0,0,0,.25)); }
       .stk-pop p{ display:inline-block; margin-top:4px; background:var(--bar-strong); -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px);
         padding:9px 16px; border-radius:999px; font-weight:700; font-size:16px; box-shadow:0 8px 24px rgba(0,0,0,.18), 0 0 0 .5px var(--sep); white-space:nowrap; }
+      .elf-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:4px; padding:12px 8px 8px; }
+      .elf-m{ border:0; background:none; padding:4px 0 8px; display:flex; flex-direction:column; align-items:center; gap:2px; border-radius:14px; }
+      .elf-m:active{ background:var(--press); }
+      .elf-m svg{ width:78px; height:78px; filter:drop-shadow(0 3px 6px rgba(0,0,0,.16)); transition:transform .2s cubic-bezier(.2,1.6,.4,1); }
+      .elf-m:active svg{ transform:scale(.9) rotate(-4deg); }
+      .elf-m span{ font-size:13px; font-weight:600; }
+      .stk-pop p{ white-space:normal !important; max-width:min(320px, 86vw); line-height:1.35; border-radius:18px !important; }
       .bub.stkb{ background:none !important; box-shadow:none; padding:0; }
       .bub.stkb svg{ width:112px; height:112px; filter:drop-shadow(0 4px 10px rgba(0,0,0,.18)); }
       /* ---------- Checklist ---------- */
@@ -503,6 +510,12 @@
             <button class="btn tint" type="button" id="copyReport"></button>
             <button class="btn tint hidden" type="button" id="shareReport"></button>
           </div>
+        </div>
+
+        <div id="elfCorner">
+          <div class="sec-h"><h2>Góc E.L.F.</h2></div>
+          <div class="list elf-grid" id="elfGrid"></div>
+          <p class="sec-f">Chạm vào ai là người đó nói một câu với Xèo.</p>
         </div>
 
         <p class="sec-s">Cài đặt</p>
@@ -1005,7 +1018,60 @@
       'Nhắc khẽ: chụp xong, chép thẻ, rồi mới được mở concert cũ ra xem. Có kỷ luật mới là E.L.F. xịn.'
     ];
     var STK_KINDS = ['elf', 'stick', 'cam', 'heart', 'party'];
+    /* ---------- Chibi 9 thành viên Super Junior (tự vẽ, SVG) ----------
+       Không phải chân dung: mỗi bạn là một chibi với kiểu tóc + món đồ gắn với biệt danh fan hay gọi. */
+    var HAIR = {
+      cap:'M21 48C20 27 33 15 48 15C63 15 76 27 75 48C71 37 62 31 48 31C34 31 25 37 21 48Z',
+      bangs:'M21 48C20 27 33 15 48 15C63 15 76 27 75 48C71 37 62 31 48 31C34 31 25 37 21 48ZM24 41C30 30 40 28 48 32C55 28 66 30 72 41C66 37 60 37 56 39C52 35 44 35 40 39C35 36 29 37 24 41Z',
+      side:'M21 48C20 27 33 15 48 15C63 15 76 27 75 48C72 40 66 35 58 34C50 41 36 41 27 37C24 41 22 44 21 48ZM29 31C40 21 59 21 71 35C60 30 44 32 29 37Z',
+      up:'M21 48C20 27 33 15 48 15C63 15 76 27 75 48C71 37 62 31 48 31C34 31 25 37 21 48ZM33 23C35 9 53 5 63 14C58 14 54 16 52 20C48 16 40 17 33 23Z',
+      long:'M21 48C20 27 33 15 48 15C63 15 76 27 75 48C71 37 62 31 48 31C34 31 25 37 21 48ZM21 47C20 56 22 64 27 69C26 60 27 54 30 47ZM75 47C76 56 74 64 69 69C70 60 69 54 66 47Z',
+      short:'M23 45C23 27 35 18 48 18C61 18 73 27 73 45C68 37 60 33 48 33C36 33 28 37 23 45Z'
+    };
+    var MEMBERS = [
+      {id:'leeteuk', name:'Leeteuk', hair:'up', hc:'#3a2a24', line:'Leader dặn: ăn đủ, ngủ đủ, giao ảnh đủ. Thiếu cái nào cũng không được nha Xèo.',
+        back:'<path d="M27 74C10 68 7 53 13 46C17 56 23 61 31 65Z" fill="#fff" stroke="#C9D6EA" stroke-width="2.5"/><path d="M69 74C86 68 89 53 83 46C79 56 73 61 65 65Z" fill="#fff" stroke="#C9D6EA" stroke-width="2.5"/>',
+        front:'<ellipse cx="48" cy="8" rx="14" ry="4" fill="none" stroke="#fff" stroke-width="6"/><ellipse cx="48" cy="8" rx="14" ry="4" fill="none" stroke="#F4C542" stroke-width="3"/>'},
+      {id:'heechul', name:'Heechul', hair:'long', hc:'#5a2f28', line:'Đẹp là phải tự tin. Ảnh của Xèo hôm nay đẹp gần bằng Heechul rồi đó — gần thôi.',
+        front:'<circle cx="82" cy="60" r="10" fill="#D6E7FF" stroke="#fff" stroke-width="3.5"/><path d="M77 56q4-3 8 0" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/><rect x="79" y="69" width="6" height="16" rx="3" fill="#F4C542" stroke="#fff" stroke-width="2.5"/><path d="M90 42l1.4 3.4 3.4 1.4-3.4 1.4L90 52l-1.4-3.4-3.4-1.4 3.4-1.4z" fill="#F4C542"/>'},
+      {id:'yesung', name:'Yesung', hair:'short', hc:'#2a2230', line:'Chậm mà chắc như rùa nhà Yesung — nhưng deadline thì đừng chậm nha.',
+        front:'<ellipse cx="80" cy="85" rx="12" ry="8" fill="#5BA35B" stroke="#fff" stroke-width="3.5"/><path d="M73 83l4 4 3.5-4 3.5 4 4-4" stroke="#3E7A3E" stroke-width="1.6" fill="none"/><circle cx="92.5" cy="81" r="4.2" fill="#8BC48B" stroke="#fff" stroke-width="2.5"/><circle cx="93.5" cy="80" r="1" fill="#1d1a2e"/>'},
+      {id:'shindong', name:'Shindong', hair:'short', hc:'#2a2230', glasses:true, line:'Đạo diễn Shindong chấm: khung hình này 10 điểm, khỏi quay lại!',
+        front:'<rect x="69" y="54" width="20" height="14" rx="3" fill="#2b2b33" stroke="#fff" stroke-width="3"/><path d="M89 58l6-4v14l-6-4z" fill="#2b2b33" stroke="#fff" stroke-width="2.5" stroke-linejoin="round"/><circle cx="74" cy="51" r="4" fill="#2b2b33" stroke="#fff" stroke-width="2"/><circle cx="83" cy="51" r="4" fill="#2b2b33" stroke="#fff" stroke-width="2"/><circle cx="74" cy="61" r="2" fill="#FF5C8A"/>'},
+      {id:'eunhyuk', name:'Eunhyuk', hair:'side', hc:'#D9A94E', line:'Xong việc thưởng một hộp sữa dâu. Eunhyuk duyệt!',
+        front:'<path d="M71 62h17v24H71z" fill="#FFB8CB" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><path d="M71 62l8.5-8 8.5 8z" fill="#FF8FB0" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><circle cx="79.5" cy="74" r="4.2" fill="#E8456B"/><path d="M79.5 69.5v-2" stroke="#3E7A3E" stroke-width="1.8" stroke-linecap="round"/>'},
+      {id:'donghae', name:'Donghae', hair:'side', hc:'#2a2230', line:'Cá Donghae bơi qua chúc Xèo hôm nay ánh sáng đẹp như biển Mokpo.',
+        front:'<path d="M69 76c6-8 18-8 23 0-5 8-17 8-23 0z" fill="#5B9BF0" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><path d="M69 76l-7-6v12z" fill="#5B9BF0" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><circle cx="85" cy="74" r="1.8" fill="#1d1a2e"/><path d="M90 62q2-3 0-6M94 64q3-4 0-9" stroke="#9BC3F7" stroke-width="2" fill="none" stroke-linecap="round"/>'},
+      {id:'siwon', name:'Siwon', hair:'up', hc:'#2a2230', grin:true, line:'Cười tươi lên! Nhiếp ảnh gia vui thì ảnh đẹp thêm 30%, Siwon tính rồi.',
+        front:'<path d="M48 68l-4.5 4 4.5 15 4.5-15z" fill="#E8456B" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/><path d="M66 52l1.6 3.8 3.8 1.6-3.8 1.6L66 62.8l-1.6-3.8-3.8-1.6 3.8-1.6z" fill="#F4C542" stroke="#fff" stroke-width="1"/>'},
+      {id:'ryeowook', name:'Ryeowook', hair:'bangs', hc:'#4a3226', line:'Ăn tối xong rồi hẵng hậu kỳ nha — hôm nay Ryeowook đứng bếp giùm.',
+        front:'<path d="M31 25c-6-2-6-12 2-12 1-7 12-9 15-3 3-6 14-4 15 3 8 0 8 10 2 12v7H31z" fill="#fff" stroke="#C9D2E0" stroke-width="2.5" stroke-linejoin="round"/><path d="M31 28h34" stroke="#C9D2E0" stroke-width="2"/>'},
+      {id:'kyuhyun', name:'Kyuhyun', hair:'bangs', hc:'#2a2230', line:'Level hôm nay: xong 3 nhiệm vụ, phần thưởng là khách trả đủ tiền. Kyuhyun chơi thật.',
+        front:'<rect x="65" y="68" width="29" height="17" rx="8.5" fill="#2b2b33" stroke="#fff" stroke-width="3"/><path d="M71 76.5h6M74 73.5v6" stroke="#fff" stroke-width="2" stroke-linecap="round"/><circle cx="85" cy="74.5" r="1.9" fill="#FF5C8A"/><circle cx="89" cy="78.5" r="1.9" fill="#5B9BF0"/>'}
+    ];
+    var MEMBER_MAP = {};
+    MEMBERS.forEach(function(m){ MEMBER_MAP[m.id] = m; });
+    function chibi(m){
+      var skin = '#FFE1C9', shirt = '#2E6BC6';
+      var body = '<path d="M30 92V78c0-8 8-13 18-13s18 5 18 13v14z"/>', head = '<circle cx="48" cy="47" r="26"/>';
+      var eyes = m.glasses
+        ? '<rect x="30" y="43" width="15" height="10" rx="4.5" fill="#1d1a2e"/><rect x="51" y="43" width="15" height="10" rx="4.5" fill="#1d1a2e"/><path d="M45 47h6" stroke="#1d1a2e" stroke-width="2"/><path d="M33 45l4 0" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".7"/>'
+        : '<ellipse cx="38" cy="49" rx="3.8" ry="4.4" fill="#1d1a2e"/><ellipse cx="58" cy="49" rx="3.8" ry="4.4" fill="#1d1a2e"/><circle cx="39.4" cy="47.4" r="1.4" fill="#fff"/><circle cx="59.4" cy="47.4" r="1.4" fill="#fff"/>';
+      var mouth = m.grin ? '<path d="M41 57q7 8 14 0z" fill="#fff" stroke="#1d1a2e" stroke-width="2" stroke-linejoin="round"/>' : '<path d="M43 58q5 4.5 10 0" fill="none" stroke="#1d1a2e" stroke-width="2.3" stroke-linecap="round"/>';
+      return '<svg viewBox="0 0 96 96" class="stk" aria-hidden="true">' + (m.back || '') +
+        '<g fill="#fff" stroke="#fff" stroke-width="8" stroke-linejoin="round">' + body + head + '<path d="' + HAIR[m.hair] + '"/></g>' +
+        '<g fill="' + shirt + '">' + body + '</g><path d="M42 66l6 5 6-5" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".8"/>' +
+        '<g fill="' + skin + '">' + head + '</g><path d="' + HAIR[m.hair] + '" fill="' + m.hc + '"/>' +
+        eyes + '<ellipse cx="31" cy="56" rx="4.5" ry="2.8" fill="#FF9DB5" opacity=".8"/><ellipse cx="65" cy="56" rx="4.5" ry="2.8" fill="#FF9DB5" opacity=".8"/>' + mouth +
+        (m.front || '') + '</svg>';
+    }
+    function memberInText(t){
+      var n = norm(t);
+      for (var i = 0; i < MEMBERS.length; i++) if (n.indexOf(MEMBERS[i].id) >= 0) return MEMBERS[i];
+      return null;
+    }
     function STK(kind){
+      if (MEMBER_MAP[kind]) return chibi(MEMBER_MAP[kind]);
       var B = '#2E6BC6';
       var BLOB = 'M48 28C70 28 82 43 82 61C82 77 67 87 48 87C29 87 14 77 14 61C14 43 26 28 48 28Z';
       var eyes = kind === 'sleep'
@@ -1045,10 +1111,11 @@
       card.classList.toggle('hidden', !state.cfg.fun);
       if (!state.cfg.fun) return;
       var n = dayNumber() + quoteOffset, i = ((n * 7) % QUOTES.length + QUOTES.length) % QUOTES.length;
-      var h = new Date().getHours(), kind = (h >= 22 || h < 5) ? 'sleep' : STK_KINDS[((n % STK_KINDS.length) + STK_KINDS.length) % STK_KINDS.length];
+      var h = new Date().getHours(), who = memberInText(QUOTES[i]) || MEMBERS[((n % MEMBERS.length) + MEMBERS.length) % MEMBERS.length];
+      var kind = (h >= 22 || h < 5) ? 'sleep' : who.id;
       document.getElementById('quoteText').textContent = QUOTES[i];
       document.getElementById('quoteStk').innerHTML = STK(kind);
-      document.getElementById('quoteLbl').textContent = quoteOffset ? 'Thêm một câu nữa' : 'Câu của hôm nay';
+      document.getElementById('quoteLbl').textContent = (quoteOffset ? 'Thêm một câu nữa' : 'Câu của hôm nay') + (kind === 'sleep' ? ' · ngủ sớm nha' : ' · cùng ' + who.name);
     }
     function celebrate(text, kind){
       if (!state.cfg.fun) return;
@@ -1215,8 +1282,8 @@
     function jobAction(act, id){
       var j = jobById(id); if (!j) return;
       if (act === 'next'){ var i = STAGES.indexOf(j.stage); if (i < STAGES.length-1){ j.stage = STAGES[i+1]; toast('“' + j.client + '” sang bước ' + j.stage); } renderAll();
-        if (j.stage === 'Đã giao') celebrate('Giao ảnh rồi! Thưởng 1 MV Suju nha', 'stick');
-        if (j.stage === 'Xong') celebrate('Xong job ' + j.client + '! E.L.F. tự hào ghê', 'party'); }
+        if (j.stage === 'Đã giao') celebrate('Giao ảnh rồi! Leeteuk khen Xèo giỏi', 'leeteuk');
+        if (j.stage === 'Xong') celebrate('Xong job ' + j.client + '! Siwon cười tươi rói', 'siwon'); }
       if (act === 'prev'){ var k = STAGES.indexOf(j.stage); if (k > 0){ j.stage = STAGES[k-1]; toast('Đã lùi về bước ' + j.stage, 'warn'); } renderAll(); }
       if (act === 'del'){
         var n = state.txs.filter(function(t){ return String(t.jobId) === String(id); }).length;
@@ -1373,7 +1440,7 @@
         checkDone[c.key][it] = !checkDone[c.key][it]; saveLocal();
         var all = items.every(function(x){ return checkDone[c.key][x]; });
         renderChecklist();
-        if (all && checkDone[c.key][it]) celebrate('Đủ đồ rồi! Xách máy đi thôi', 'cam');
+        if (all && checkDone[c.key][it]) celebrate('Đủ đồ rồi! Đạo diễn Shindong: diễn!', 'shindong');
         if (navigator.vibrate){ try{ navigator.vibrate(6); }catch(e){} }
       }); });
       $$('#checkList .ck-del').forEach(function(b){ b.addEventListener('click', function(){
@@ -1446,7 +1513,7 @@
           date:f.elements.date.value || dstr(0), method:f.elements.method.value, note:f.elements.note.value.trim() });
         api.close(); toast((kind === 'thu' ? 'Đã ghi khoản thu ' : 'Đã ghi khoản chi ') + fmt(amt)); renderAll();
         var paidJob = f.elements.jobId.value ? jobById(f.elements.jobId.value) : null;
-        if (kind === 'thu' && paidJob && paidJob.price && jobOwe(paidJob) === 0) celebrate(paidJob.client + ' trả đủ rồi! Bonamana!', 'heart');
+        if (kind === 'thu' && paidJob && paidJob.price && jobOwe(paidJob) === 0) celebrate(paidJob.client + ' trả đủ rồi! Eunhyuk mời sữa dâu', 'eunhyuk');
       }
       openSheet({ title:'Ghi thu chi', left:'Huỷ', right:'Lưu', body:body, onRight:save,
         bind:function(api){
@@ -1647,6 +1714,11 @@
       }).join('');
       bindRows($('#deptGrid'));
       $('#dailyReport').textContent = dailyReportText();
+      $('#elfCorner').classList.toggle('hidden', !state.cfg.fun);
+      if (state.cfg.fun && !$('#elfGrid').children.length){
+        $('#elfGrid').innerHTML = MEMBERS.map(function(m){ return '<button type="button" class="elf-m" data-m="' + m.id + '">' + chibi(m) + '<span>' + esc(m.name) + '</span></button>'; }).join('');
+        $$('#elfGrid .elf-m').forEach(function(b){ b.addEventListener('click', function(){ var m = MEMBER_MAP[b.getAttribute('data-m')]; celebrate(m.line, m.id); }); });
+      }
       $('#clearLabel').textContent = state.sample ? 'Xoá dữ liệu mẫu, bắt đầu trống' : 'Xoá toàn bộ dữ liệu';
     }
     function dailyReportText(){
@@ -1681,7 +1753,7 @@
     }
     function answer(qRaw){
       var q = norm(qRaw);
-      if (/suju|super ?junior|\belf\b|e\.l\.f|oppa|leeteuk|heechul|yesung|shindong|eunhyuk|donghae|siwon|ryeowook|kyuhyun/.test(q)) return SJ_CHEERS[Math.floor(Math.random() * SJ_CHEERS.length)];
+      if (/suju|super ?junior|\belf\b|e\.l\.f|oppa|leeteuk|heechul|yesung|shindong|eunhyuk|donghae|siwon|ryeowook|kyuhyun/.test(q)) { var mm = memberInText(qRaw); if (mm && state.cfg.fun) setTimeout(function(){ addSticker(mm.id); }, 120); return mm ? mm.name + ' nói: ' + mm.line : SJ_CHEERS[Math.floor(Math.random() * SJ_CHEERS.length)]; }
       if (q.indexOf('chua tra') >= 0 || q.indexOf('con no') >= 0 || q.indexOf('no tien') >= 0 || q.indexOf('thieu tien') >= 0 || q.indexOf('ai no') >= 0) return debtorsText();
       if (q.indexOf('bao cao') >= 0) return dailyReportText();
       if (q.indexOf('hom nay') >= 0 && (q.indexOf('chup') >= 0 || q.indexOf('job') >= 0 || q.indexOf('viec') >= 0 || q.indexOf('lam gi') >= 0)){
@@ -1927,7 +1999,7 @@
       setNav();
       var day = document.createElement('p'); day.className = 'chat-day'; day.textContent = 'Hôm nay';
       $('#chatBox').appendChild(day);
-      if (state.cfg.fun) addSticker('elf');
+      if (state.cfg.fun) addSticker('leeteuk');
       addBubble('Chào Xèo! Trợ lý đây. Cứ hỏi thoải mái — “Ai chưa trả tiền?”, “Tháng này lời bao nhiêu?” — hoặc ra lệnh như “chi makeup 2 triệu”.', 'bot');
     })();
 </script>
