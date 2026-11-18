@@ -43,6 +43,22 @@ thanh tab mờ ở dưới, tự đổi sáng/tối theo máy.
   ("chi makeup 2 triệu").
 - Dữ liệu cũ giữ nguyên: vẫn đọc khoá `troLyXeo.v1`, cùng định dạng sao lưu JSON.
 
+## Cài đặt — thông số của Xèo
+
+Bấm bánh răng góc trên (tab Hôm nay / Phòng ban), hoặc Phòng ban → **Thông số của Xèo**.
+Gõ tới đâu tự lưu tới đó.
+
+- **Tên gọi, tên studio:** dùng trong lời chào, tin nhắn mẫu, báo giá, báo cáo.
+- **Bảng giá gói** (Portrait, Couple, Wedding, Lookbook, Event): thêm job mới tự điền
+  giá theo gói; máy tính giá ở Phòng Đón Khách dùng bảng này.
+- **Phụ phí:** thêm giờ, thêm địa điểm, retouch mỗi ảnh, album.
+- **% cọc** (báo giá + tin nhắn mẫu) và **số ngày giao ảnh** (hạn giao tự điền
+  sau ngày chụp).
+- **Thiết bị & khấu hao:** nhập giá mua và số năm định dùng, app tính khấu hao
+  mỗi tháng; một nút ghi khấu hao tháng này vào sổ (mỗi tháng ghi một lần).
+- **Chi cố định hằng tháng:** phần mềm, cloud, mặt bằng…; đầu tháng một nút ghi hết.
+- Cài đặt nằm chung trong bản sao lưu JSON; "Xoá dữ liệu" không xoá cài đặt.
+
 ## Thêm vào màn hình chính (dùng như app thật)
 
 Trong app, đầu màn hình **Hôm nay** có dải **"Cài lên màn hình chính"** với
