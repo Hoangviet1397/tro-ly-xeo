@@ -3,7 +3,7 @@
    - Có bản mới trên GitHub: tải sẵn vào bộ nhớ mới, CHỜ Xèo bấm "Cập nhật" (tin nhắn SKIP_WAITING) mới chuyển.
    - Chỉ xử lý file của chính app; lượt gọi tới Google đi thẳng, không qua đây.
    - Không đăng ký khi mở file offline (file://) — xem index.html. */
-var CACHE = 'tro-ly-xeo-v12';
+var CACHE = 'tro-ly-xeo-v13';
 var ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', function (event) {
@@ -15,9 +15,11 @@ self.addEventListener('install', function (event) {
           if (res && res.ok) return cache.put(url, res);
         }).catch(function () { /* thiếu 1 file cũng không hỏng */ });
       }));
-    }).then(function () {
-      /* lần cài đầu tiên (chưa có bản nào) thì chạy ngay; còn lại chờ Xèo bấm Cập nhật */
-      if (!self.registration.active) return self.skipWaiting();
+    }).then(function () { return caches.keys(); }).then(function (keys) {
+      /* Chạy ngay khi: lần cài đầu tiên, hoặc máy đang ở bản cũ hơn v12 (bản cũ chưa có nút Cập nhật).
+         Còn lại thì chờ Xèo bấm "Cập nhật". */
+      var oldNoButton = keys.some(function (k) { var m = /^tro-ly-xeo-v(\d+)$/.exec(k); return m && +m[1] < 12; });
+      if (!self.registration.active || oldNoButton) return self.skipWaiting();
     })
   );
 });
