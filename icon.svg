@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Trợ lý Xèo — hoa sen và ống kính máy ảnh">
+  <rect width="512" height="512" fill="#FBF5EA"/>
+  <circle cx="256" cy="256" r="222" fill="none" stroke="#D9A441" stroke-width="10"/>
+  <path d="M86 400 Q150 330 256 356 Q362 330 426 400 Q360 452 256 452 Q152 452 86 400Z" fill="#7E9471"/>
+  <path d="M130 402 Q190 352 256 368 Q322 352 382 402 Q320 438 256 438 Q192 438 130 402Z" fill="#5F7A54"/>
+  <g>
+    <ellipse cx="256" cy="180" rx="52" ry="118" fill="#C4837F" transform="rotate(-42 256 330)"/>
+    <ellipse cx="256" cy="180" rx="52" ry="118" fill="#C4837F" transform="rotate(-21 256 330)"/>
+    <ellipse cx="256" cy="172" rx="54" ry="126" fill="#A96663"/>
+    <ellipse cx="256" cy="180" rx="52" ry="118" fill="#C4837F" transform="rotate(21 256 330)"/>
+    <ellipse cx="256" cy="180" rx="52" ry="118" fill="#C4837F" transform="rotate(42 256 330)"/>
+  </g>
+  <circle cx="256" cy="300" r="66" fill="#D9A441"/>
+  <circle cx="256" cy="300" r="46" fill="#4A3524"/>
+  <circle cx="256" cy="300" r="18" fill="#7A6350"/>
+  <circle cx="240" cy="284" r="11" fill="#FFF6E8"/>
+</svg>
