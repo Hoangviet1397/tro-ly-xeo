@@ -181,6 +181,11 @@ Chỉ chạm và vuốt dọc: không chụm/chạm đúp để phóng to, khôn
 
 ## Ảnh trong app
 
+- **Ảnh trang chủ đổi mỗi ngày**, xoay vòng qua ảnh của Xèo (kèm dòng chữ đổi theo ngày).
+- **Thêm ảnh từ máy:** trang Hôm nay → Ảnh của Xèo → "Thêm ảnh từ máy". Ảnh được thu nhỏ (~1400px) và lưu trong
+  app trên chính máy này (IndexedDB), xem được offline, tối đa 60 ảnh. Chạm ảnh để đặt làm ảnh hôm nay hoặc xoá.
+  Ảnh từ máy không nằm trong file sao lưu JSON (vì nặng) — ảnh gốc vẫn còn trong thư viện ảnh của điện thoại.
+
 Ảnh đầu trang và mục **Ảnh của Xèo** là ảnh Xèo chụp, lấy từ Instagram
 [@xeonong](https://www.instagram.com/xeonong/) (bản 640px công khai), gắn thẳng vào `index.html`
 để mở offline được. Chạm vào ảnh là mở bài gốc trên Instagram.
