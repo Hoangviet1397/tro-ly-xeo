@@ -82,6 +82,44 @@ Gõ tới đâu tự lưu tới đó.
   rồi dán vào Cài đặt → Google Lịch → Client ID. Hướng dẫn chi tiết có trong app (Cài đặt → Cách lấy Client ID).
 - Lịch iPhone (iCloud) không cho app web đọc thẳng — bật đồng bộ sang Google Lịch là xem được.
 
+## Dữ liệu ở đâu, cập nhật thế nào
+
+- **Mọi dữ liệu nằm trên máy của Xèo** (bộ nhớ trình duyệt): job, sổ tiền, cài đặt, lịch đã tải, gợi ý từ Gmail,
+  danh bạ. Không gửi lên GitHub hay máy chủ nào. GitHub chỉ là chỗ tải file app về lần đầu và khi cập nhật.
+- **Dùng offline:** app luôn chạy bản đã lưu trên máy. Có mạng mà GitHub có bản mới thì app tải sẵn và hiện
+  dải **"Có bản cập nhật mới"** ở trang Hôm nay — bấm **Cập nhật** mới chuyển, dữ liệu giữ nguyên.
+  Cài đặt → Phiên bản → **Kiểm tra** để tự kiểm tra.
+- Mã đăng nhập Google chỉ giữ trong phiên đang mở (đóng app là mất, hết hạn sau ~1 giờ) — đó là chìa khoá tạm,
+  không phải dữ liệu.
+
+## Bảo mật
+
+- **Khoá app bằng Face ID** (hoặc vân tay / mật mã máy, qua passkey của máy) + **mã PIN dự phòng** (sai 5 lần thì
+  tạm khoá, mỗi lần lâu hơn). Rời app quá 2 phút là khoá lại. Đây là khoá màn hình của app; dữ liệu vẫn nằm
+  trong trình duyệt của máy, nên đặt cả mật mã cho điện thoại.
+- Chính sách bảo mật nội dung (CSP): app chỉ được kết nối tới chính nó và Google API; không nhúng được vào trang khác;
+  không gửi địa chỉ trang đi (no-referrer).
+- Đăng nhập Google kiểm tra mã state chống giả mạo, xoá mã khỏi thanh địa chỉ ngay; chỉ xin quyền theo tính năng bật;
+  ngắt kết nối là thu hồi quyền và xoá dữ liệu Google đã lưu.
+- Dữ liệu đọc từ máy / file sao lưu luôn được làm sạch; chữ của khách luôn được lọc trước khi hiện; link chỉ mở http(s);
+  email gửi đi chặn chèn header (Bcc lén).
+- Lưu ý: các app khác của cùng tài khoản GitHub Pages (hoangviet1397.github.io) dùng chung vùng nhớ trình duyệt.
+  Trên máy Xèo chỉ nên mở app này; muốn tách hẳn thì chuyển sang tên miền riêng.
+
+## Ghi Google Lịch + email cho khách
+
+- Cài đặt → Lấy gì từ Google → **Ghi buổi chụp vào Google Lịch**: lưu job có ngày chụp là tự thêm / cập nhật sự kiện
+  (2 tiếng, nhắc trước 12 tiếng và 1 tiếng); xoá job thì xoá luôn sự kiện app đã tạo. Trong chi tiết job có nút
+  "Thêm / Cập nhật trên Google Lịch".
+- **Email cho khách:** 5 mẫu soạn sẵn — Xác nhận lịch chụp, Đã nhận cọc, Nhắc trước ngày chụp, Giao ảnh, Nhắc thanh toán.
+  Sửa thoải mái rồi bấm **Gửi bằng Gmail** (bật "Gửi email cho khách bằng Gmail"), hoặc mở bằng app Mail / chép.
+  App hỏi "Báo cho khách luôn?" khi vừa thêm job có ngày, vừa nhận cọc, vừa chuyển sang Đã giao. Không bao giờ tự gửi.
+
+## Giao diện kính mờ
+
+Nền màu loang nhẹ (sapphire, hồng cánh bướm, kem), thẻ / thanh tab / bảng trượt dạng kính mờ kiểu iOS.
+Tắt ở Cài đặt → Giao diện → Kính mờ kiểu iOS nếu máy chạy chậm.
+
 ## Kết nối Google: Gmail, Danh bạ, Drive (cùng một lần đăng nhập)
 
 Cài đặt → **Lấy gì từ Google**: bật tính năng nào thì app xin đúng quyền **đọc** cho tính năng đó.

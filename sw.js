@@ -1,17 +1,29 @@
 /* Service worker cho Trợ lý Xèo trên GitHub Pages (https).
-   Chỉ lưu app vào máy để mở offline sau lần đầu.
-   Không đăng ký khi mở file offline (file://) — xem index.html. */
-var CACHE = 'tro-ly-xeo-v11';
+   - App luôn chạy bản đã lưu trên máy → dùng offline được.
+   - Có bản mới trên GitHub: tải sẵn vào bộ nhớ mới, CHỜ Xèo bấm "Cập nhật" (tin nhắn SKIP_WAITING) mới chuyển.
+   - Chỉ xử lý file của chính app; lượt gọi tới Google đi thẳng, không qua đây.
+   - Không đăng ký khi mở file offline (file://) — xem index.html. */
+var CACHE = 'tro-ly-xeo-v12';
 var ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', function (event) {
   event.waitUntil(
     caches.open(CACHE).then(function (cache) {
       return Promise.all(ASSETS.map(function (url) {
-        return cache.add(url).catch(function () { /* thiếu 1 file cũng không hỏng */ });
+        /* cache:'reload' — lấy bản mới nhất từ GitHub, bỏ qua bộ nhớ đệm HTTP */
+        return fetch(new Request(url, { cache: 'reload' })).then(function (res) {
+          if (res && res.ok) return cache.put(url, res);
+        }).catch(function () { /* thiếu 1 file cũng không hỏng */ });
       }));
-    }).then(function () { return self.skipWaiting(); })
+    }).then(function () {
+      /* lần cài đầu tiên (chưa có bản nào) thì chạy ngay; còn lại chờ Xèo bấm Cập nhật */
+      if (!self.registration.active) return self.skipWaiting();
+    })
   );
+});
+
+self.addEventListener('message', function (event) {
+  if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });
 
 self.addEventListener('activate', function (event) {
@@ -26,17 +38,20 @@ self.addEventListener('activate', function (event) {
 });
 
 self.addEventListener('fetch', function (event) {
-  if (event.request.method !== 'GET') return;
+  var req = event.request;
+  if (req.method !== 'GET') return;
+  if (new URL(req.url).origin !== self.location.origin) return;   /* Google API... đi thẳng mạng */
   event.respondWith(
-    caches.match(event.request, { ignoreSearch: true }).then(function (hit) {
-      var net = fetch(event.request).then(function (res) {
-        if (res && res.ok && new URL(event.request.url).origin === self.location.origin) {
-          var copy = res.clone();
-          caches.open(CACHE).then(function (c) { c.put(event.request, copy); }).catch(function () {});
-        }
-        return res;
-      }).catch(function () { return hit || caches.match('./index.html'); });
-      return hit || net;
+    caches.open(CACHE).then(function (cache) {
+      return cache.match(req, { ignoreSearch: true }).then(function (hit) {
+        if (hit) return hit;   /* bản đã lưu — không tự đổi ngầm, chỉ đổi khi bấm Cập nhật */
+        return fetch(req).then(function (res) {
+          if (res && res.ok) cache.put(req, res.clone()).catch(function () {});
+          return res;
+        }).catch(function () {
+          return req.mode === 'navigate' ? cache.match('./index.html') : Response.error();
+        });
+      });
     })
   );
 });
