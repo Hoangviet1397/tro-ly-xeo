@@ -70,6 +70,11 @@ Gõ tới đâu tự lưu tới đó.
 
 ## Vui mỗi ngày (E.L.F. mode)
 
+- **Hoa cánh bướm bay khắp app:** vài cánh hoa và bông nhỏ trôi nhẹ trên nền; chạm nút / dòng nào là
+  chùm cánh hoa toả ra từ chỗ ngón tay; lướt trang, bảng hay hàng ảnh là hoa bay theo hướng lướt;
+  ăn mừng thì nổ chùm hoa to. Tắt riêng ở Cài đặt → Giao diện → Hoa cánh bướm bay
+  (máy bật "giảm chuyển động" thì tự tắt).
+
 - **Câu của hôm nay** trên màn Hôm nay: mỗi ngày một câu vui về nghề chụp ảnh và Super Junior,
   bấm "Câu khác" hoặc chạm sticker để đổi, "Chép gửi bạn" để gửi.
 - **Sticker E.L.F. tự vẽ** (nhân vật tròn màu Pearl Sapphire Blue: vương miện, lightstick, máy ảnh,

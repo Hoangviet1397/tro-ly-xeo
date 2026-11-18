@@ -418,6 +418,16 @@
       .petal > span{ display:block; animation:flutter ease-in-out infinite alternate; }
       @keyframes fall{ to{ transform:translateY(calc(100vh + 100px)) rotate(420deg); } }
       @keyframes flutter{ from{ transform:translateX(-18px) rotate(-22deg); } to{ transform:translateX(18px) rotate(26deg); } }
+      /* ---------- Hoa bay khắp app ---------- */
+      .fx-layer{ position:fixed; inset:0; z-index:250; pointer-events:none; overflow:hidden; }
+      .fx{ position:absolute; left:0; top:0; will-change:transform, opacity; filter:drop-shadow(0 2px 3px rgba(190,40,110,.18)); }
+      .fx svg{ display:block; }
+      .ambient .drift{ position:absolute; left:0; opacity:.5; animation:drift linear infinite; }
+      .ambient .drift.rev{ animation-name:driftRev; }
+      .ambient .drift > span{ display:block; animation:bobble ease-in-out infinite alternate; }
+      @keyframes drift{ from{ transform:translateX(-60px); } to{ transform:translateX(calc(100vw + 60px)); } }
+      @keyframes driftRev{ from{ transform:translateX(calc(100vw + 60px)); } to{ transform:translateX(-60px); } }
+      @keyframes bobble{ from{ transform:translateY(-28px) rotate(-30deg); } to{ transform:translateY(28px) rotate(35deg); } }
       .foot{ text-align:center; color:var(--label3); font-size:12px; margin-top:30px; line-height:1.5; }
       @media (min-width:700px){
         .hero img{ height:300px; }
@@ -708,7 +718,7 @@
       prices:{ Portrait:2500000, Couple:4000000, Wedding:15000000, Lookbook:8000000, Event:5000000 },
       extraHour:500000, extraLoc:700000, retouch:150000, album:2000000,
       depositPct:40, deliverDays:14,
-      equipment:[], fixed:[], checkExtra:{}, theme:'elf', fun:true
+      equipment:[], fixed:[], checkExtra:{}, theme:'elf', fun:true, petals:true
     };
     function mergeCfg(c){
       var o = JSON.parse(JSON.stringify(DEFAULT_CFG));
@@ -997,7 +1007,7 @@
       }); });
     }
     function renderHome(){
-      applyTheme(); renderQuote(); if (typeof renderSampleBanner === 'function') renderSampleBanner();
+      applyTheme(); renderQuote(); if (typeof renderSampleBanner === 'function') renderSampleBanner(); if (typeof renderAmbient === 'function') renderAmbient();
       var ig = state.cfg.instagram || 'xeonong';
       $('#igLink').href = 'https://www.instagram.com/' + encodeURIComponent(ig) + '/';
       $$('.igName').forEach(function(x){ x.textContent = ig; });
@@ -2081,7 +2091,8 @@
         '<p class="sec-f">Dùng trong lời chào, tin nhắn mẫu, báo giá, báo cáo và mục Ảnh của Xèo.</p>';
       h += '<p class="sec-s">Giao diện</p><div class="list"><div style="padding:12px 16px;"><div class="seg" id="themeSeg">' +
         '<button type="button" data-th="elf"' + (c.theme !== 'rose' ? ' class="on"' : '') + '>Pearl Sapphire Blue</button><button type="button" data-th="rose"' + (c.theme === 'rose' ? ' class="on"' : '') + '>Hồng đất</button></div></div>' +
-        '<label class="row" style="cursor:pointer;"><span class="txt"><span class="t1" style="display:block;">Sticker &amp; câu vui mỗi ngày</span><span class="t2" style="display:block;">Sticker E.L.F., câu nói hôm nay, ăn mừng khi xong việc</span></span><input type="checkbox" class="switch" id="funSwitch"' + (c.fun ? ' checked' : '') + ' /></label></div>' +
+        '<label class="row" style="cursor:pointer;"><span class="txt"><span class="t1" style="display:block;">Sticker &amp; câu vui mỗi ngày</span><span class="t2" style="display:block;">Sticker E.L.F., câu nói hôm nay, ăn mừng khi xong việc</span></span><input type="checkbox" class="switch" id="funSwitch"' + (c.fun ? ' checked' : '') + ' /></label>' +
+        '<label class="row" style="cursor:pointer;"><span class="txt"><span class="t1" style="display:block;">Hoa cánh bướm bay</span><span class="t2" style="display:block;">Hoa bay nhẹ khắp app, chạm hay lướt là hoa toả ra</span></span><input type="checkbox" class="switch" id="petalSwitch"' + (c.petals !== false ? ' checked' : '') + ' /></label></div>' +
         '<p class="sec-f">Pearl Sapphire Blue là màu fan của Super Junior.</p>';
       h += '<p class="sec-s">Bảng giá gói chụp</p><div class="list">' +
         TYPES.filter(function(t){ return t !== 'Khác'; }).map(function(t){ return money('prices.' + t, t, c.prices[t]); }).join('') + '</div>' +
@@ -2140,6 +2151,7 @@
       $$('#themeSeg button', b).forEach(function(x){ x.addEventListener('click', function(){
         state.cfg.theme = x.getAttribute('data-th'); $$('#themeSeg button', b).forEach(function(y){ y.classList.toggle('on', y === x); }); renderAll();
       }); });
+      var ps2 = $('#petalSwitch', b); if (ps2) ps2.addEventListener('change', function(){ state.cfg.petals = ps2.checked; renderAll(); });
       var fs2 = $('#funSwitch', b); if (fs2) fs2.addEventListener('change', function(){ state.cfg.fun = fs2.checked; renderAll(); if (fs2.checked) celebrate('Chào E.L.F.!', 'elf'); });
       var rd = $('#recDep', b);
       if (rd) rd.addEventListener('click', function(){
@@ -2352,6 +2364,103 @@
     $('#guideRow').addEventListener('click', function(){ openWelcome({guideOnly:true}); });
     paintIcons();
     if (lsGet('troLyXeo.welcomed') !== '2') setTimeout(function(){ openWelcome(); }, 250);
+    </script>
+
+    <script>
+    /* ================= HOA CÁNH BƯỚM BAY KHẮP APP + PHẢN HỒI CHẠM / LƯỚT ================= */
+    var RM = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    function petalsOn(){ return !RM && state.cfg.fun && state.cfg.petals !== false; }
+    var fxLayer = document.createElement('div'); fxLayer.className = 'fx-layer'; fxLayer.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(fxLayer);
+    function rnd(a, b){ return a + Math.random() * (b - a); }
+    function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+    function petalSvg(c, s){ return '<svg viewBox="-12 -32 24 34" width="' + s.toFixed(0) + '" height="' + (s * 1.4).toFixed(0) + '"><path d="' + PETAL + '" fill="' + c + '"/></svg>'; }
+    function miniCosmos(c, s){ return '<svg viewBox="-34 -34 68 68" width="' + s.toFixed(0) + '" height="' + s.toFixed(0) + '">' + cosmos(0, 0, 30, c, rnd(0, 90), 0) + '</svg>'; }
+
+    /* Bay nền: vài cánh hoa + bông nhỏ trôi ngang theo gió */
+    var ambient = null;
+    function renderAmbient(){
+      var on = petalsOn();
+      if (on && !ambient){
+        ambient = document.createElement('div'); ambient.className = 'ambient';
+        var html = '';
+        for (var i = 0; i < 10; i++){
+          var flower = i % 3 === 0, c = pick(COSMOS_COLORS), rev = i % 4 === 1;
+          html += '<span class="drift' + (rev ? ' rev' : '') + '" style="top:' + rnd(6, 88).toFixed(0) + '%;animation-duration:' + rnd(18, 32).toFixed(1) + 's;animation-delay:-' + rnd(0, 30).toFixed(1) + 's">' +
+            '<span style="animation-duration:' + rnd(2.8, 5.5).toFixed(1) + 's">' + (flower ? miniCosmos(c, rnd(16, 24)) : petalSvg(c, rnd(11, 18))) + '</span></span>';
+        }
+        ambient.innerHTML = html; fxLayer.appendChild(ambient);
+      } else if (!on && ambient){ ambient.remove(); ambient = null; }
+    }
+
+    /* Chạm: chùm cánh hoa toả ra từ ngón tay */
+    function burst(x, y, n, spread){
+      if (fxLayer.childElementCount > 70) return;
+      spread = spread || 1;
+      for (var i = 0; i < n; i++){
+        var el = document.createElement('span'); el.className = 'fx';
+        var center = i === 0, c = pick(COSMOS_COLORS);
+        el.innerHTML = center ? miniCosmos(c, 18 * Math.min(spread, 1.6)) : petalSvg(c, rnd(8, 14) * Math.min(spread, 1.4));
+        el.style.left = x + 'px'; el.style.top = y + 'px';
+        fxLayer.appendChild(el);
+        var ang = rnd(0, Math.PI * 2), d = center ? 0 : rnd(24, 58) * spread;
+        var dx = Math.cos(ang) * d, dy = Math.sin(ang) * d - (center ? 14 : 10), rot = rnd(-200, 200);
+        var anim = el.animate([
+          { transform:'translate(-50%,-50%) scale(.3) rotate(0deg)', opacity:1 },
+          { transform:'translate(calc(-50% + ' + dx.toFixed(1) + 'px), calc(-50% + ' + dy.toFixed(1) + 'px)) scale(' + (center ? 1.25 : 1) + ') rotate(' + rot.toFixed(0) + 'deg)', opacity:1, offset:.55 },
+          { transform:'translate(calc(-50% + ' + (dx * 1.15).toFixed(1) + 'px), calc(-50% + ' + (dy + 30).toFixed(1) + 'px)) scale(.7) rotate(' + (rot * 1.5).toFixed(0) + 'deg)', opacity:0 }
+        ], { duration:rnd(650, 1050), easing:'cubic-bezier(.2,.8,.3,1)' });
+        anim.onfinish = (function(e){ return function(){ e.remove(); }; })(el);
+      }
+    }
+    var lastBurst = 0;
+    document.addEventListener('pointerdown', function(e){
+      if (!petalsOn()) return;
+      var t = e.target.closest && e.target.closest('button, a, .row, .tile, .pill, label, .shot, .elf-m, .q-stk, .switch');
+      if (!t) return;
+      var now = performance.now(); if (now - lastBurst < 80) return; lastBurst = now;
+      burst(e.clientX, e.clientY, 7, 1);
+    }, { passive:true, capture:true });
+
+    /* Lướt: cánh hoa bay theo hướng lướt (cả trang, bảng trượt, hàng ảnh ngang) */
+    var lastScrollFx = 0, scrollPos = new WeakMap();
+    document.addEventListener('scroll', function(e){
+      if (!petalsOn()) return;
+      var tgt = e.target === document ? document.scrollingElement : e.target;
+      if (!tgt || tgt.nodeType !== 1) return;
+      var prev = scrollPos.get(tgt) || {x:tgt.scrollLeft, y:tgt.scrollTop};
+      var vx = tgt.scrollLeft - prev.x, vy = tgt.scrollTop - prev.y;
+      scrollPos.set(tgt, {x:tgt.scrollLeft, y:tgt.scrollTop});
+      var now = performance.now(); if (now - lastScrollFx < 110 || (Math.abs(vx) < 2 && Math.abs(vy) < 2)) return; lastScrollFx = now;
+      if (fxLayer.childElementCount > 70) return;
+      var horiz = Math.abs(vx) > Math.abs(vy), dir = horiz ? Math.sign(vx) : Math.sign(vy);
+      var r = tgt === document.scrollingElement ? {left:0, top:0, width:innerWidth, height:innerHeight} : tgt.getBoundingClientRect();
+      var n = Math.min(3, 1 + Math.floor(Math.abs(horiz ? vx : vy) / 40));
+      for (var i = 0; i < n; i++){
+        var el = document.createElement('span'); el.className = 'fx';
+        el.innerHTML = Math.random() < .2 ? miniCosmos(pick(COSMOS_COLORS), rnd(14, 20)) : petalSvg(pick(COSMOS_COLORS), rnd(10, 16));
+        var x, y, dx, dy;
+        if (horiz){ x = dir > 0 ? r.left + r.width * rnd(.75, .95) : r.left + r.width * rnd(.05, .25); y = r.top + r.height * rnd(.2, .8); dx = -dir * rnd(70, 140); dy = rnd(-30, 30); }
+        else { x = r.left + r.width * rnd(.08, .92); y = dir > 0 ? r.top + r.height * rnd(.7, .9) : r.top + r.height * rnd(.12, .3); dx = rnd(-50, 50); dy = -dir * rnd(90, 170); }
+        el.style.left = x + 'px'; el.style.top = y + 'px';
+        fxLayer.appendChild(el);
+        var rot = rnd(-260, 260);
+        var anim = el.animate([
+          { transform:'translate(-50%,-50%) scale(.5) rotate(0deg)', opacity:0 },
+          { transform:'translate(calc(-50% + ' + (dx * .4).toFixed(1) + 'px), calc(-50% + ' + (dy * .4).toFixed(1) + 'px)) scale(1) rotate(' + (rot * .4).toFixed(0) + 'deg)', opacity:.9, offset:.3 },
+          { transform:'translate(calc(-50% + ' + dx.toFixed(1) + 'px), calc(-50% + ' + dy.toFixed(1) + 'px)) scale(.8) rotate(' + rot.toFixed(0) + 'deg)', opacity:0 }
+        ], { duration:rnd(1000, 1500), easing:'ease-out' });
+        anim.onfinish = (function(e){ return function(){ e.remove(); }; })(el);
+      }
+    }, { passive:true, capture:true });
+
+    /* Ăn mừng: nổ thêm một chùm hoa to giữa màn hình */
+    var _celebrate = celebrate;
+    celebrate = function(text, kind){
+      _celebrate(text, kind);
+      if (petalsOn() && state.cfg.fun){ burst(innerWidth / 2, innerHeight * .42, 12, 2.4); setTimeout(function(){ burst(innerWidth / 2, innerHeight * .42, 9, 1.6); }, 180); }
+    };
+    renderAmbient();
     </script>
 
     <script>
