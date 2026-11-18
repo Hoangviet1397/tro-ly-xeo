@@ -82,6 +82,24 @@ Gõ tới đâu tự lưu tới đó.
   rồi dán vào Cài đặt → Google Lịch → Client ID. Hướng dẫn chi tiết có trong app (Cài đặt → Cách lấy Client ID).
 - Lịch iPhone (iCloud) không cho app web đọc thẳng — bật đồng bộ sang Google Lịch là xem được.
 
+## Kết nối Google: Gmail, Danh bạ, Drive (cùng một lần đăng nhập)
+
+Cài đặt → **Lấy gì từ Google**: bật tính năng nào thì app xin đúng quyền **đọc** cho tính năng đó.
+Không có gì tự ghi vào sổ — app chỉ gợi ý, Xèo bấm mới ghi.
+
+- **Gmail · tiền về:** đọc email báo biến động số dư của ngân hàng (45 ngày gần nhất), lấy số tiền vào
+  + nội dung chuyển khoản, đoán khách (theo tên trong nội dung, số tiền còn thiếu, số tiền cọc) và loại
+  khoản (cọc / sau buổi chụp / sau giao ảnh). Hiện ở tab Tiền bạc → chạm → "Ghi vào sổ…" (form điền sẵn)
+  hoặc bỏ qua. Bỏ qua giao dịch trừ tiền và dòng số dư. Khoản đã ghi không hiện lại.
+- **Gmail · khách hỏi chụp:** tìm email 30 ngày gần nhất hỏi lịch / giá chụp (bỏ thư quảng cáo, no-reply,
+  ngân hàng, khách đã có trong sổ). Hiện đầu tab Buổi chụp → tạo buổi chụp ở bước Tư vấn, điền sẵn tên, email.
+- **Danh bạ:** gõ tên khách trong form là có gợi ý, chọn đúng tên thì tự điền số điện thoại + email.
+  Mỗi job có ô **Điện thoại**, trong chi tiết có nút **Gọi** và **Nhắn Zalo**.
+- **Google Drive:** trong chi tiết job → "Chọn thư mục từ Google Drive", tìm theo tên (chỉ xem tên + link thư mục).
+- Trang Hôm nay nhắc "N khoản tiền mới từ Gmail chưa ghi sổ", "N khách hỏi chụp qua Gmail".
+- Google Cloud cần bật thêm **Gmail API, People API, Google Drive API** và thêm quyền
+  gmail.readonly, contacts.readonly, drive.metadata.readonly ở mục Data access (hướng dẫn trong app).
+
 ## Nạp buổi chụp từ lịch
 
 - Ở trang cuối màn chào mừng, đầu phần **Cài đặt**, hoặc Phòng ban → **Nạp buổi chụp từ lịch**.

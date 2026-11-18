@@ -545,6 +545,7 @@
         <div class="lt"><p class="eyebrow" id="jobsEyebrow">Buổi chụp</p><h1>Buổi chụp</h1></div>
         <div class="seg" id="jobsSeg" style="margin-top:12px;"><button type="button" data-jm="list" class="on">Danh sách</button><button type="button" data-jm="cal">Lịch</button></div>
         <div class="pills" id="stageChips"></div>
+        <div id="gmLeads"></div>
         <div id="jobList" style="margin-top:14px;"></div>
         <div id="calView" class="hidden" style="margin-top:14px;"></div>
 
@@ -565,6 +566,7 @@
         <div class="lt"><p class="eyebrow" id="moneyEyebrow">Tháng này</p><h1>Tiền bạc</h1></div>
         <div class="tiles" id="moneyStats"></div>
 
+        <div id="gmBank"></div>
         <div class="sec-h"><h2>Lời theo từng job</h2></div>
         <div class="list" id="jobProfit"></div>
 
@@ -715,6 +717,7 @@
       wallet:'<path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H18v3"/><rect x="4" y="8" width="16.5" height="11.5" rx="2.5"/><circle cx="16" cy="13.7" r="1.2"/>',
       arrowr:'<path d="M5 12h14M13 6l6 6-6 6"/>',
       list:'<path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/>',
+      phone:'<path d="M5.5 3.5h3.2l1.8 4.6-2.2 1.4a11.5 11.5 0 0 0 6.2 6.2l1.4-2.2 4.6 1.8v3.2a2 2 0 0 1-2.1 2A16.5 16.5 0 0 1 3.5 5.6a2 2 0 0 1 2-2.1z"/>',
       gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
       sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>'
     };
@@ -752,7 +755,7 @@
       prices:{ Portrait:2500000, Couple:4000000, Wedding:15000000, Lookbook:8000000, Event:5000000 },
       extraHour:500000, extraLoc:700000, retouch:150000, album:2000000,
       depositPct:40, deliverDays:14,
-      equipment:[], fixed:[], checkExtra:{}, theme:'elf', fun:true, petals:true, gClientId:'', gCals:[]
+      equipment:[], fixed:[], checkExtra:{}, theme:'elf', fun:true, petals:true, gClientId:'', gCals:[], gFeat:{cal:true, bank:false, leads:false, contacts:false, drive:false}
     };
     function mergeCfg(c){
       var o = JSON.parse(JSON.stringify(DEFAULT_CFG));
@@ -769,6 +772,8 @@
       o.instagram = o.instagram.replace(/[^A-Za-z0-9._]/g, '') || DEFAULT_CFG.instagram;
       o.gClientId = /^[\w.-]{10,200}\.apps\.googleusercontent\.com$/.test(String(o.gClientId || '').trim()) ? String(o.gClientId).trim() : '';
       o.gCals = Array.isArray(o.gCals) ? o.gCals.map(function(x){ return cleanStr(x, 200); }).filter(Boolean).slice(0, 30) : [];
+      var gf = o.gFeat && typeof o.gFeat === 'object' ? o.gFeat : {};
+      o.gFeat = { cal:gf.cal !== false, bank:gf.bank === true, leads:gf.leads === true, contacts:gf.contacts === true, drive:gf.drive === true };
       o.theme = o.theme === 'rose' ? 'rose' : 'elf'; o.fun = o.fun !== false; o.petals = o.petals !== false;
       var ids = {}, next = 900000;
       function cid(v){ var id = /^\d{1,12}$/.test(String(v)) ? +v : null; if (id === null || ids[id]) id = ++next; ids[id] = 1; return id; }
@@ -831,7 +836,7 @@
       var jobs = (Array.isArray(d.jobs) ? d.jobs : []).filter(function(x){ return x && typeof x === 'object'; }).map(function(j){
         var o = { client:cleanStr(j.client, 120).trim() || 'Khách chưa đặt tên', type:TYPES.indexOf(j.type) >= 0 ? j.type : 'Khác',
           stage:STAGES.indexOf(j.stage) >= 0 ? j.stage : 'Tư vấn', shootDate:cleanDate(j.shootDate), shootTime:cleanTime(j.shootTime),
-          location:cleanStr(j.location, 200), deadline:cleanDate(j.deadline), price:cleanNum(j.price), email:cleanStr(j.email, 200),
+          location:cleanStr(j.location, 200), deadline:cleanDate(j.deadline), price:cleanNum(j.price), phone:cleanStr(j.phone, 30).replace(/[^\d+]/g, ''), email:cleanStr(j.email, 200),
           fbLink:safeUrl(j.fbLink), msLink:safeUrl(j.msLink), driveLink:safeUrl(j.driveLink), note:cleanStr(j.note, 3000), calUid:cleanStr(j.calUid, 200) };
         o.id = takeId(j.id, o); return o;
       });
@@ -839,7 +844,7 @@
       var txs = (Array.isArray(d.txs) ? d.txs : []).filter(function(x){ return x && typeof x === 'object' && cleanNum(x.amount) > 0; }).map(function(t){
         var kind = t.kind === 'chi' ? 'chi' : 'thu', jid = cleanId(t.jobId);
         var o = { kind:kind, category:cleanStr(t.category, 80) || (kind === 'chi' ? 'Phát sinh khác' : 'Thu khác'), jobId:jid !== null && jobIds[jid] ? jid : '',
-          amount:cleanNum(t.amount), date:cleanDate(t.date) || dstr(0), method:cleanStr(t.method, 40) || 'Chuyển khoản', note:cleanStr(t.note, 500) };
+          amount:cleanNum(t.amount), date:cleanDate(t.date) || dstr(0), method:cleanStr(t.method, 40) || 'Chuyển khoản', note:cleanStr(t.note, 500), src:cleanStr(t.src, 80) };
         o.id = takeId(t.id, o); return o;
       });
       pending.forEach(function(o){ o.id = ++maxId; });
@@ -1392,6 +1397,7 @@
         infoRow('coin', 'teal', 'Lời tạm tính', fmt(paid - spent), (paid - spent) >= 0 ? 'green' : 'red') +
         '<button type="button" class="row act" data-act="addtx"><span class="ic bg-accent">' + I('plus', 2.4) + '</span><span class="txt t1">Ghi khoản thu / chi cho job này</span></button></div>';
       h += '<p class="sec-s">Liên lạc</p><div class="list">' +
+        (j.phone ? actRow('call', 'phone', 'green', 'Gọi ' + j.phone) + actRow('zalo', 'bubble', 'blue', 'Nhắn Zalo', 'Mở Zalo với số ' + j.phone) : '') +
         actRow('msgr', 'bubble', 'purple', 'Nhắn Messenger', 'Chép sẵn tin nhắn, qua đó chỉ cần Dán rồi Gửi') +
         actRow('fb', 'globe', 'blue', 'Mở Facebook khách') +
         actRow('mail', 'mail', 'blue', 'Gửi email', j.email || 'Chưa có email — bấm Sửa để thêm') +
@@ -1403,7 +1409,8 @@
         actRow('alarm', 'alarm', 'orange', 'Đặt báo thức', 'Chép giờ và ghi chú để dán vào app Đồng hồ') + '</div>';
       h += '<p class="sec-s">Google Drive</p><div class="list">' +
         '<label class="frow full"><input id="driveInp" value="' + esc(j.driveLink || '') + '" placeholder="Dán link thư mục Drive của job…" inputmode="url" autocomplete="off" /></label>' +
-        actRow('drive', 'folder', 'green', 'Mở thư mục Drive') + '</div>' +
+        actRow('drive', 'folder', 'green', 'Mở thư mục Drive') +
+        (state.cfg.gFeat && state.cfg.gFeat.drive ? actRow('drivepick', 'folder', 'blue', 'Chọn thư mục từ Google Drive', 'Tìm theo tên, khỏi dán link') : '') + '</div>' +
         '<p class="sec-f">Dán link xong là tự lưu.</p>';
       h += '<div class="list" style="margin-top:28px;"><button type="button" class="row center destr" data-act="del">Xoá buổi chụp này</button></div>';
       return h;
@@ -1449,6 +1456,9 @@
       if (act === 'addtx'){ openTxForm({jobId:id, kind: jobOwe(j) > 0 ? 'thu' : 'chi'}); }
       if (act === 'msgr'){ copyText(msgFor(j), 'Đã chép tin nhắn — qua Messenger Dán rồi Gửi'); window.open(safeUrl(j.msLink) || 'https://m.me/', '_blank'); }
       if (act === 'fb'){ copyText(msgFor(j), 'Đã chép tin nhắn — qua Facebook Dán rồi Gửi'); window.open(safeUrl(j.fbLink) || 'https://www.facebook.com/', '_blank'); }
+      if (act === 'call'){ location.href = 'tel:' + String(j.phone).replace(/[^\d+]/g, ''); return; }
+      if (act === 'zalo'){ window.open('https://zalo.me/' + String(j.phone).replace(/[^\d]/g, '').replace(/^84/, '0'), '_blank'); return; }
+      if (act === 'drivepick'){ if (typeof openDrivePicker === 'function') openDrivePicker(j); return; }
       if (act === 'copymsg'){ copyText(msgFor(j), 'Đã chép tin nhắn mẫu'); }
       if (act === 'mail'){
         if (!j.email){ toast('Chưa có email khách — bấm Sửa để thêm', 'warn'); return; }
@@ -1475,7 +1485,7 @@
     /* ---------- Form thêm / sửa buổi chụp ---------- */
     function frow(label, inner, cls){ return '<label class="frow' + (cls ? ' ' + cls : '') + '"><span>' + label + '</span>' + inner + '</label>'; }
     function openJobForm(j, pre){
-      var e = j || Object.assign({client:'', type:'Portrait', stage:'Tư vấn', shootDate:'', shootTime:'', location:'', deadline:'', price:state.cfg.prices.Portrait || 0, email:'', fbLink:'', msLink:'', driveLink:'', note:''}, pre || {});
+      var e = j || Object.assign({client:'', type:'Portrait', stage:'Tư vấn', shootDate:'', shootTime:'', location:'', deadline:'', price:state.cfg.prices.Portrait || 0, phone:'', email:'', fbLink:'', msLink:'', driveLink:'', note:''}, pre || {});
       var opt = function(arr, cur){ return arr.map(function(x){ return '<option' + (x === cur ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join(''); };
       var body = '<form id="jobForm" autocomplete="off">' +
         '<div class="list" style="margin-top:8px;">' +
@@ -1492,6 +1502,7 @@
           frow('Tổng giá job', '<input name="price" inputmode="numeric" value="' + (e.price ? (+e.price).toLocaleString('vi-VN') : '') + '" placeholder="6.000.000" />') + '</div>' +
         '<p class="sec-f">Tiền cọc và các đợt trả ghi ở tab Tiền bạc — app tự trừ ra số khách còn thiếu.</p>' +
         '<p class="sec-s">Liên lạc</p><div class="list">' +
+          frow('Điện thoại', '<input type="tel" name="phone" value="' + esc(e.phone || '') + '" placeholder="0901 234 567" inputmode="tel" />') +
           frow('Email', '<input type="email" name="email" value="' + esc(e.email) + '" placeholder="khach@email.com" inputmode="email" />') +
           frow('Facebook', '<input name="fbLink" value="' + esc(e.fbLink) + '" placeholder="facebook.com/…" inputmode="url" />') +
           frow('Messenger', '<input name="msLink" value="' + esc(e.msLink) + '" placeholder="m.me/…" inputmode="url" />') +
@@ -1503,7 +1514,7 @@
         if (!g('client')){ var r = $('.frow.req', f); r.classList.add('invalid'); f.elements.client.focus(); api.el.classList.remove('shake'); void api.el.offsetWidth; api.el.classList.add('shake'); toast('Nhập tên khách trước nha', 'warn'); return; }
         var link = safeUrl;
         var data = { client:g('client'), type:g('type'), stage:g('stage') || 'Tư vấn', shootDate:g('shootDate'), shootTime:g('shootTime'), location:g('location'),
-          deadline:g('deadline'), price:moneyVal(f.elements.price), email:g('email'), fbLink:link(g('fbLink')), msLink:link(g('msLink')), driveLink:link(g('driveLink')), note:g('note') };
+          deadline:g('deadline'), price:moneyVal(f.elements.price), phone:g('phone').replace(/[^\d+]/g, '').slice(0, 20), email:g('email'), fbLink:link(g('fbLink')), msLink:link(g('msLink')), driveLink:link(g('driveLink')), note:g('note') };
         if (j){ Object.keys(data).forEach(function(k){ j[k] = data[k]; }); toast('Đã lưu thay đổi'); }
         else { data.id = nid(); if (pre && pre.calUid) data.calUid = cleanStr(pre.calUid, 200); state.jobs.unshift(data); toast('Đã thêm buổi chụp mới'); }
         api.close(); renderAll();
@@ -1516,6 +1527,7 @@
           moneyInput(f.elements.price);
           f.addEventListener('submit', function(ev){ ev.preventDefault(); save(api); });
           f.elements.client.addEventListener('input', function(){ $('.frow.req', f).classList.remove('invalid'); });
+          if (typeof gContactsBind === 'function') gContactsBind(f);
           var autoP = !j, autoD = !e.deadline;
           f.elements.price.addEventListener('input', function(){ autoP = false; });
           f.elements.type.addEventListener('change', function(){ if (!autoP) return; var p = state.cfg.prices[f.elements.type.value]; f.elements.price.value = p ? (+p).toLocaleString('vi-VN') : ''; });
@@ -1663,7 +1675,7 @@
         var f = $('#txForm', api.body), amt = moneyVal(f.elements.amount);
         if (!amt){ var b = $('#amtBox', api.body); b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); toast('Nhập số tiền trước nha', 'warn'); f.elements.amount.focus(); return; }
         state.txs.unshift({ id:nid(), kind:kind, category:f.elements.category.value, jobId:f.elements.jobId.value || '', amount:amt,
-          date:f.elements.date.value || dstr(0), method:f.elements.method.value, note:f.elements.note.value.trim() });
+          date:f.elements.date.value || dstr(0), method:f.elements.method.value, note:f.elements.note.value.trim(), src:cleanStr(pre.src, 80) });
         api.close(); toast((kind === 'thu' ? 'Đã ghi khoản thu ' : 'Đã ghi khoản chi ') + fmt(amt)); renderAll();
         var paidJob = f.elements.jobId.value ? jobById(f.elements.jobId.value) : null;
         if (kind === 'thu' && paidJob && paidJob.price && jobOwe(paidJob) === 0) celebrate(paidJob.client + ' trả đủ rồi! Eunhyuk mời sữa dâu', 'eunhyuk');
@@ -1678,6 +1690,11 @@
           f.elements.jobId.addEventListener('change', function(){ hint(api); });
           f.addEventListener('submit', function(ev){ ev.preventDefault(); save(api); });
           setKind(api, kind);
+          if (pre.amount){ f.elements.amount.value = (+pre.amount).toLocaleString('vi-VN'); fitAmount(f.elements.amount); }
+          if (pre.category) f.elements.category.value = pre.category;
+          if (pre.date) f.elements.date.value = pre.date;
+          if (pre.note) f.elements.note.value = pre.note;
+          if (pre.amount) hint(api);
           setTimeout(function(){ try{ f.elements.amount.focus({preventScroll:true}); }catch(err){} }, 450);
         } });
     }
@@ -2176,20 +2193,32 @@
       var h = '<div class="jd-head"><span class="ic lg bg-gray">' + I('gear') + '</span><h2>Thông số của ' + esc(c.name) + '</h2><p>App dùng để tính giá, cọc, hạn giao và khấu hao</p></div>';
       h += '<p class="sec-s">Nạp dữ liệu</p><div class="list"><button type="button" class="row" id="cfgCal"><span class="ic bg-red">' + I('cal') + '</span><span class="txt"><span class="t1" style="display:block;">Nạp buổi chụp từ lịch</span><span class="t2" style="display:block;">File .ics hoặc .zip xuất từ Google Lịch</span></span>' + chevSvg() + '</button></div>';
       var gt = typeof gToken === 'function' ? gToken() : null, gc = typeof gcal !== 'undefined' ? gcal : null;
-      h += '<p class="sec-s">Google Lịch — xem lịch không cần file</p><div class="list">' +
+      h += '<p class="sec-s">Kết nối Google — chỉ đọc</p><div class="list">' +
         frow('Client ID', '<input data-cfg="gClientId" value="' + esc(c.gClientId) + '" placeholder="…apps.googleusercontent.com" autocapitalize="off" autocomplete="off" spellcheck="false" />') +
         (c.gClientId ? (gt || gc
           ? '<div class="row"><span class="ic bg-green">' + I('check', 2.6) + '</span><span class="txt"><span class="t1" style="display:block;">' + (gt ? 'Đang kết nối' : 'Đã kết nối (hết hạn, bấm Kết nối lại)') + '</span><span class="t2" style="display:block;">' + (gc ? gc.events.length + ' sự kiện · cập nhật ' + agoText(gc.fetchedAt) : 'Chưa tải lịch') + '</span></span><button type="button" class="btn tint sm" id="gConnRow2">' + (gt ? 'Làm mới' : 'Kết nối lại') + '</button></div>' +
             '<button type="button" class="row center destr" id="gDisc">Ngắt kết nối Google Lịch</button>'
-          : '<button type="button" class="row act" id="gConnRow"><span class="ic bg-blue">' + I('cal') + '</span><span class="txt t1">Kết nối Google Lịch</span></button>') : '') +
+          : '<button type="button" class="row act" id="gConnRow"><span class="ic bg-blue">' + I('cal') + '</span><span class="txt t1">Kết nối Google</span></button>') : '') +
         '<button type="button" class="row" id="gGuideRow"><span class="ic bg-gray">' + I('doc') + '</span><span class="txt"><span class="t1" style="display:block;">Cách lấy Client ID</span><span class="t2" style="display:block;">Làm một lần, khoảng 10 phút, miễn phí</span></span>' + chevSvg() + '</button></div>';
+      var F = c.gFeat || {};
+      var feat = function(key, icon, color, title, sub){
+        var miss = F[key] && gt && typeof gNeeds === 'function' && gNeeds(key);
+        return '<label class="row" style="cursor:pointer;"><span class="ic bg-' + color + '">' + I(icon) + '</span><span class="txt"><span class="t1" style="display:block;">' + title + '</span><span class="t2' + (miss ? ' orange' : '') + '" style="display:block;">' + (miss ? 'Chưa cấp quyền — bấm Kết nối lại' : sub) + '</span></span><input type="checkbox" class="switch" data-gfeat="' + key + '"' + (F[key] ? ' checked' : '') + ' /></label>';
+      };
+      h += '<p class="sec-s">Lấy gì từ Google</p><div class="list">' +
+        feat('cal', 'cal', 'red', 'Google Lịch', 'Xem lịch trong tab Buổi chụp → Lịch') +
+        feat('bank', 'inarrow', 'green', 'Gmail · tiền về', 'Đọc email báo số dư của ngân hàng, gợi ý ghi khoản thu') +
+        feat('leads', 'mail', 'purple', 'Gmail · khách hỏi chụp', 'Tìm email hỏi lịch / giá, gợi ý tạo buổi chụp') +
+        feat('contacts', 'person', 'orange', 'Danh bạ', 'Gõ tên khách là gợi ý số điện thoại, email') +
+        feat('drive', 'folder', 'blue', 'Google Drive', 'Chọn thư mục ảnh của job, chỉ xem tên thư mục') + '</div>' +
+        '<p class="sec-f">Bật tính năng nào thì app xin đúng quyền đọc cho tính năng đó. Không có gì tự ghi vào sổ — app chỉ gợi ý, Xèo bấm mới ghi.</p>';
       if (gc && gc.cals && gc.cals.length){
         var chosenIds = gChosen(gc.cals).map(function(x){ return x.id; });
         h += '<p class="sec-s">Lịch hiển thị trong app</p><div class="list">' + gc.cals.map(function(cl){
           return '<label class="row" style="cursor:pointer;"><span class="ic round" style="background:' + cl.color + '">' + I('cal') + '</span><span class="txt t1 clip">' + esc(cl.name) + '</span><input type="checkbox" class="switch" data-gcal="' + esc(cl.id) + '"' + (chosenIds.indexOf(cl.id) >= 0 ? ' checked' : '') + ' /></label>';
         }).join('') + '</div>';
       }
-      h += '<p class="sec-f">App chỉ xin quyền <b>đọc</b> lịch. Mã đăng nhập chỉ nằm trên máy này và tự hết hạn sau khoảng 1 giờ. Lịch đã tải được lưu lại để mất mạng vẫn xem.</p>';
+      h += '<p class="sec-f">App chỉ xin quyền <b>đọc</b>, không gửi, sửa hay xoá gì. Mã đăng nhập chỉ nằm trên máy này và tự hết hạn sau khoảng 1 giờ. Lịch đã tải được lưu lại để mất mạng vẫn xem.</p>';
       h += '<p class="sec-s">Thông tin</p><div class="list">' +
         frow('Tên gọi', '<input data-cfg="name" value="' + esc(c.name) + '" placeholder="Xèo" />') +
         frow('Tên studio', '<input data-cfg="studio" value="' + esc(c.studio) + '" placeholder="Sadako Photography" />') +
@@ -2259,13 +2288,20 @@
       $$('#themeSeg button', b).forEach(function(x){ x.addEventListener('click', function(){
         state.cfg.theme = x.getAttribute('data-th'); $$('#themeSeg button', b).forEach(function(y){ y.classList.toggle('on', y === x); }); renderAll();
       }); });
+      $$('[data-gfeat]', b).forEach(function(sw){ sw.addEventListener('change', function(){
+        var k = sw.getAttribute('data-gfeat'); state.cfg.gFeat = state.cfg.gFeat || {}; state.cfg.gFeat[k] = sw.checked; saveLocal();
+        if (sw.checked && gToken() && !gHas(FEAT_SCOPE[k])){
+          actionSheet({ title:'Cho phép thêm quyền đọc?', msg:'Chuyển sang Google để cho phép app đọc ' + ({cal:'lịch', bank:'Gmail', leads:'Gmail', contacts:'danh bạ', drive:'tên thư mục Drive'})[k] + '. Xong sẽ tự quay lại app.', actions:[{ label:'Tiếp tục', fn:function(){ gConnect(false); } }] });
+        } else if (sw.checked && gToken()) { gSyncAll(true); }
+        renderAll(); refreshSettings();
+      }); });
       var gcr = $('#gConnRow', b); if (gcr) gcr.addEventListener('click', function(){ gConnect(false); });
-      var gcr2 = $('#gConnRow2', b); if (gcr2) gcr2.addEventListener('click', function(){ if (gToken()) gFetch(true); else gConnect(true); });
+      var gcr2 = $('#gConnRow2', b); if (gcr2) gcr2.addEventListener('click', function(){ if (gToken()) gSyncAll(true); else gConnect(true); });
       var ggr = $('#gGuideRow', b); if (ggr) ggr.addEventListener('click', function(){ openGGuide(); });
       var gds = $('#gDisc', b); if (gds) gds.addEventListener('click', function(){
-        actionSheet({ title:'Ngắt kết nối Google Lịch?', msg:'Xoá lịch đã lưu trên máy và thu hồi quyền đọc lịch. Buổi chụp đã thêm vẫn giữ nguyên.', actions:[{ label:'Ngắt kết nối', destructive:true, fn:function(){
+        actionSheet({ title:'Ngắt kết nối Google Lịch?', msg:'Xoá lịch, email gợi ý và danh bạ đã lưu trên máy, thu hồi mọi quyền đọc. Buổi chụp và sổ thu chi vẫn giữ nguyên.', actions:[{ label:'Ngắt kết nối', destructive:true, fn:function(){
           var t = gToken(); if (t) fetch('https://oauth2.googleapis.com/revoke?token=' + encodeURIComponent(t), { method:'POST', headers:{ 'Content-Type':'application/x-www-form-urlencoded' } }).catch(function(){});
-          lsSet(GT_KEY, ''); lsSet(GC_KEY, ''); gcal = null; renderAll(); refreshSettings(); toast('Đã ngắt kết nối Google Lịch', 'del');
+          lsSet(GT_KEY, ''); lsSet(GC_KEY, ''); gcal = null; lsSet(GM_KEY, ''); gmail = null; lsSet(GCT_KEY, ''); gContacts = []; renderAll(); refreshSettings(); toast('Đã ngắt kết nối Google Lịch', 'del');
         } }] });
       });
       $$('[data-gcal]', b).forEach(function(sw){ sw.addEventListener('change', function(){
@@ -2780,7 +2816,7 @@
       if (location.protocol !== 'https:' && location.hostname !== 'localhost'){ toast('Mở app bằng link GitHub Pages để kết nối Google Lịch', 'warn'); return; }
       var nonce = Math.random().toString(36).slice(2) + Date.now().toString(36);
       lsSet(GS_KEY, nonce);
-      var p = { client_id:state.cfg.gClientId, redirect_uri:gRedirectUri(), response_type:'token', scope:G_SCOPE, include_granted_scopes:'true', state:nonce };
+      var p = { client_id:state.cfg.gClientId, redirect_uri:gRedirectUri(), response_type:'token', scope:(typeof gScopes === 'function' ? gScopes() : G_SCOPE), include_granted_scopes:'true', state:nonce };
       if (silent) p.prompt = 'none';
       location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + Object.keys(p).map(function(k){ return k + '=' + encodeURIComponent(p[k]); }).join('&');
     }
@@ -2793,9 +2829,9 @@
       var expect = lsGet(GS_KEY); lsSet(GS_KEY, '');
       if (!q.state || q.state !== expect){ setTimeout(function(){ toast('Kết nối Google không hợp lệ, thử lại nha', 'warn'); }, 400); return; }
       if (q.access_token){
-        lsSet(GT_KEY, JSON.stringify({ t:q.access_token, exp:Date.now() + (+q.expires_in || 3600) * 1000 }));
+        lsSet(GT_KEY, JSON.stringify({ t:q.access_token, exp:Date.now() + (+q.expires_in || 3600) * 1000, s:cleanStr(q.scope, 1000) }));
         jobsMode = 'cal';
-        setTimeout(function(){ go('jobs'); renderAll(); gFetch(true); }, 300);
+        setTimeout(function(){ go('jobs'); renderAll(); if (typeof gSyncAll === 'function') gSyncAll(true); else gFetch(true); }, 300);
       } else if (/interaction_required|login_required|consent_required/.test(q.error || '')) {
         setTimeout(function(){ gConnect(false); }, 300);   /* kết nối nhanh không được → hỏi lại bình thường */
       } else if (q.error === 'access_denied') {
@@ -2819,7 +2855,7 @@
     }
     async function gFetch(manual){
       if (!state.cfg.gClientId || gState.loading) return;
-      if (!gToken()){ renderCal(); return; }
+      if (!gToken() || (typeof gHas === 'function' && !gHas(G_SCOPE))){ renderCal(); return; }
       gState.loading = true; gState.error = ''; renderCal();
       try{
         var list = await gApi('/users/me/calendarList?minAccessRole=reader&maxResults=50');
@@ -2935,8 +2971,8 @@
       var body = '<div class="jd-head"><span class="ic lg bg-blue">' + I('cal') + '</span><h2>Kết nối Google Lịch</h2><p>Làm một lần, khoảng 10 phút, miễn phí. Nên làm trên máy tính.</p></div>' +
         '<p class="sec-s">Các bước</p><div class="list">' +
         step(1, 'Mở Google Cloud', 'Vào console.cloud.google.com bằng Gmail của Xèo → tạo dự án mới, đặt tên “Tro Ly Xeo”.') +
-        step(2, 'Bật Google Calendar API', 'Menu “APIs &amp; Services” → “Library” → tìm “Google Calendar API” → Enable.') +
-        step(3, 'Màn hình xin quyền', 'Vào “Google Auth Platform” (hoặc “OAuth consent screen”) → Get started: tên app “Trợ lý Xèo”, email của Xèo, Audience chọn External. Giữ chế độ Testing và thêm Gmail của Xèo vào “Test users”.') +
+        step(2, 'Bật 4 API', 'Menu “APIs &amp; Services” → “Library” → lần lượt Enable: Google Calendar API, Gmail API, People API, Google Drive API.') +
+        step(3, 'Màn hình xin quyền', 'Vào “Google Auth Platform” (hoặc “OAuth consent screen”) → Get started: tên app “Trợ lý Xèo”, email của Xèo, Audience chọn External. Giữ chế độ Testing và thêm Gmail của Xèo vào “Test users”. Mục “Data access” thêm các quyền: calendar.readonly, gmail.readonly, contacts.readonly, drive.metadata.readonly.') +
         step(4, 'Tạo Client ID', 'Mục “Clients” (hoặc “Credentials”) → Create client → loại “Web application”. Dán 2 địa chỉ bên dưới vào đúng ô.') +
         step(5, 'Dán vào app', 'Copy Client ID (đuôi .apps.googleusercontent.com) → Cài đặt → Google Lịch → ô Client ID → Kết nối.') + '</div>' +
         '<p class="sec-s">Authorized JavaScript origins</p><div class="list"><div class="row"><span class="txt t1" style="font-family:ui-monospace,Menlo,monospace;font-size:14px;word-break:break-all;">' + esc(origin) + '</span><button type="button" class="btn tint sm" data-copy="' + esc(origin) + '">Chép</button></div></div>' +
@@ -2948,6 +2984,293 @@
     }
     renderAll();
     if (gToken() && (!gcal || Date.now() - gcal.fetchedAt > 10 * 60000)) gFetch(false);
+    </script>
+
+    <script>
+    /* ================= KẾT NỐI GOOGLE: GMAIL (tiền về, khách hỏi), DANH BẠ, DRIVE =================
+       Cùng một lần đăng nhập với Google Lịch. Chỉ xin quyền ĐỌC, theo từng tính năng Xèo bật.
+       Không có gì tự ghi vào sổ: app chỉ GỢI Ý, Xèo bấm đồng ý mới ghi. */
+    var SC = {
+      cal:'https://www.googleapis.com/auth/calendar.readonly',
+      gmail:'https://www.googleapis.com/auth/gmail.readonly',
+      contacts:'https://www.googleapis.com/auth/contacts.readonly',
+      drive:'https://www.googleapis.com/auth/drive.metadata.readonly'
+    };
+    var FEAT_SCOPE = { cal:SC.cal, bank:SC.gmail, leads:SC.gmail, contacts:SC.contacts, drive:SC.drive };
+    var GM_KEY = 'troLyXeo.gmail', GSEEN_KEY = 'troLyXeo.gseen', GCT_KEY = 'troLyXeo.gcontacts';
+    function gFeat(k){ return !!(state.cfg.gFeat && state.cfg.gFeat[k]); }
+    function gScopes(){
+      var s = [];
+      Object.keys(FEAT_SCOPE).forEach(function(k){ if (gFeat(k) && s.indexOf(FEAT_SCOPE[k]) < 0) s.push(FEAT_SCOPE[k]); });
+      return (s.length ? s : [SC.cal]).join(' ');
+    }
+    function gTokObj(){ try{ return JSON.parse(lsGet(GT_KEY) || 'null'); }catch(e){ return null; } }
+    function gHas(scope){ var t = gTokObj(); return !!(t && gToken() && (!t.s || (' ' + t.s + ' ').indexOf(' ' + scope + ' ') >= 0)); }
+    function gNeeds(k){ return gFeat(k) && gToken() && !gHas(FEAT_SCOPE[k]); }
+    var gmail = (function(){ try{ var d = JSON.parse(lsGet(GM_KEY) || 'null'); return d && Array.isArray(d.bank) ? d : null; }catch(e){ return null; } })();
+    var gSeen = (function(){ try{ var a = JSON.parse(lsGet(GSEEN_KEY) || '[]'); return Array.isArray(a) ? a : []; }catch(e){ return []; } })();
+    var gContacts = (function(){ try{ var a = JSON.parse(lsGet(GCT_KEY) || '[]'); return Array.isArray(a) ? a : []; }catch(e){ return []; } })();
+    function gSeenAdd(id){ if (gSeen.indexOf(id) < 0){ gSeen.push(id); if (gSeen.length > 800) gSeen = gSeen.slice(-800); lsSet(GSEEN_KEY, JSON.stringify(gSeen)); } }
+    async function gGet(url){
+      var t = gToken(); if (!t) throw new Error('auth');
+      var r = await fetch(url, { headers:{ Authorization:'Bearer ' + t } });
+      if (r.status === 401){ lsSet(GT_KEY, ''); throw new Error('auth'); }
+      if (r.status === 403) throw new Error('chưa bật API hoặc chưa cấp quyền');
+      if (!r.ok) throw new Error('lỗi ' + r.status);
+      return r.json();
+    }
+    async function pool(items, n, fn){ var out = [], i = 0; async function worker(){ while (i < items.length){ var k = i++; try{ out[k] = await fn(items[k]); }catch(e){ out[k] = null; } } } await Promise.all(Array.from({length:Math.min(n, items.length)}, worker)); return out; }
+
+    /* ---------- Gmail: đọc nội dung thư ---------- */
+    function b64(s){ try{ var bin = atob(String(s).replace(/-/g, '+').replace(/_/g, '/')); var u = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return new TextDecoder('utf-8').decode(u); }catch(e){ return ''; } }
+    function gmText(p){
+      var plain = '', html = '';
+      (function walk(x){ if (!x) return; if (x.body && x.body.data){ if (/text\/plain/i.test(x.mimeType)) plain += b64(x.body.data) + '\n'; else if (/text\/html/i.test(x.mimeType)) html += b64(x.body.data) + '\n'; } (x.parts || []).forEach(walk); })(p);
+      var t = plain || html.replace(/<(br|\/p|\/div|\/tr|\/td)[^>]*>/gi, '\n').replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<[^>]+>/g, ' ');
+      return t.replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&#\d+;/g, ' ').replace(/[ \t]+/g, ' ').replace(/\n\s*\n+/g, '\n').slice(0, 6000);
+    }
+    function hdr(m, name){ var h = ((m.payload || {}).headers || []).filter(function(x){ return String(x.name).toLowerCase() === name; })[0]; return h ? String(h.value) : ''; }
+    function parseFrom(v){ var m = String(v).match(/^\s*"?([^"<]*?)"?\s*<([^>]+)>/); return m ? { name:m[1].trim() || m[2], email:m[2].trim().toLowerCase() } : { name:String(v).trim(), email:String(v).trim().toLowerCase() }; }
+    function dateOf(ms){ var d = new Date(+ms || Date.now()); return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+
+    /* ---------- Gmail: tiền về từ email ngân hàng ---------- */
+    var BANK_RE = /vietcombank|vcb|techcombank|mbbank|mb bank|\bacb\b|vpbank|tpbank|bidv|vietinbank|agribank|sacombank|hdbank|\bvib\b|\bshb\b|\bocb\b|\bmsb\b|timo|cake|momo|zalopay|vnpay|ngân hàng|ngan hang|\bbank\b|biến động số dư|bien dong so du|số dư tài khoản/i;
+    function moneyNum(s){ s = String(s).trim(); if (/[.,]\d{2}$/.test(s) && /[.,]\d{3}/.test(s.slice(0, -3))) s = s.slice(0, -3); var n = +s.replace(/\D/g, ''); return n; }
+    function parseBank(text, subject, from){
+      var all = subject + '\n' + text;
+      if (!BANK_RE.test(from + ' ' + subject + ' ' + text.slice(0, 400))) return null;
+      var amt = 0, m;
+      var re1 = /([+-])\s?((?:\d{1,3}(?:[.,]\d{3})+)(?:[.,]\d{1,2})?|\d{4,}(?=\s*(?:VND|VNĐ|đ|₫)))/gi;
+      while ((m = re1.exec(all))){
+        var before = all.slice(Math.max(0, m.index - 24), m.index).split(/[\n|;]/).pop();
+        if (/(số dư|so du|balance|\bSD)\s*(cuối|khả dụng|kha dung|hiện tại)?\s*[:：=]?\s*$/i.test(before)) continue;   /* bỏ số dư tài khoản (đứng sát ngay trước con số) */
+        var v = moneyNum(m[2]); if (v < 10000) continue;
+        if (m[1] === "+"){ amt = v; break; }
+        return null;   /* giao dịch trừ tiền, không phải tiền về */
+      }
+      if (!amt){
+        m = all.match(/(?:ghi có|ghi co|nhận được|nhan duoc|tiền vào|tang|tăng|credit(?:ed)?|received)[^\d+]{0,25}\+?\s*((?:\d{1,3}(?:[.,]\d{3})+|\d{4,})(?:[.,]\d{1,2})?)/i);
+        if (m) amt = moneyNum(m[1]);
+      }
+      if (!amt || amt < 10000 || amt > 5e9) return null;
+      if (/ghi nợ|ghi no|trừ tiền|tru tien|\bdebit(ed)?\b/i.test(all) && !/ghi có|ghi co|credit/i.test(all)) return null;
+      var c = all.match(/(?:nội dung(?: giao dịch| chuyển khoản| ck)?|noi dung|\bND\b|mô tả|mo ta|diễn giải|dien giai|description|remark|content)\s*[:：]\s*([^\n|]{2,140})/i);
+      return { amount:amt, content:c ? c[1].trim() : '' };
+    }
+    function matchJob(amount, content){
+      var n = norm(content), best = null;
+      state.jobs.forEach(function(j){
+        if (j.stage === 'Xong') return;
+        var s = 0;
+        norm(j.client).split(/[^a-z0-9]+/).forEach(function(w){ if (w.length > 2 && n.indexOf(w) >= 0) s += 3; });
+        var owe = jobOwe(j); if (owe && amount === owe) s += 2;
+        var dep = Math.round((j.price || 0) * (+state.cfg.depositPct || 0) / 100);
+        if (dep && Math.abs(amount - dep) <= dep * 0.01) s += 2;
+        if (s > 0 && (!best || s > best.s)) best = { j:j, s:s };
+      });
+      return best ? best.j : null;
+    }
+    function catFor(j){
+      if (!j) return 'Thu khác';
+      var i = STAGES.indexOf(j.stage);
+      if (!jobThu(j.id) || i <= 2) return 'Cọc';
+      return i >= 6 ? 'Tiền sau khi giao ảnh' : 'Tiền sau buổi chụp';
+    }
+
+    /* ---------- Gmail: khách hỏi chụp ---------- */
+    var LEAD_Q = 'newer_than:30d in:inbox -from:me -category:promotions -category:social -category:updates (chụp OR "chup anh" OR "báo giá" OR "bao gia" OR "giá chụp" OR "lịch chụp" OR "chụp ảnh" OR wedding OR "pre-wedding" OR lookbook OR "kỷ yếu" OR "photoshoot" OR "chân dung")';
+    var BANK_Q = 'newer_than:45d (subject:("biến động" OR "giao dịch" OR "số dư" OR "nhận tiền" OR "chuyển khoản" OR transaction OR "balance") OR from:(vietcombank OR techcombank OR mbbank OR acb OR vpbank OR tpbank OR bidv OR vietinbank OR agribank OR sacombank OR timo OR cake OR momo OR zalopay))';
+
+    var gmState = { loading:false, error:'' };
+    async function gmFetch(manual){
+      if (gmState.loading || !gToken() || !gHas(SC.gmail) || !(gFeat('bank') || gFeat('leads'))) return;
+      gmState.loading = true; gmState.error = ''; renderGx();
+      try{
+        var data = { fetchedAt:Date.now(), bank:[], leads:[] };
+        if (gFeat('bank')){
+          var lb = await gGet('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=40&q=' + encodeURIComponent(BANK_Q));
+          var msgs = await pool((lb.messages || []).map(function(x){ return x.id; }), 5, function(id){ return gGet('https://gmail.googleapis.com/gmail/v1/users/me/messages/' + id + '?format=full'); });
+          msgs.forEach(function(m){
+            if (!m) return;
+            var p = parseBank(gmText(m.payload) + '\n' + (m.snippet || ''), hdr(m, 'subject'), hdr(m, 'from'));
+            if (p) data.bank.push({ id:cleanStr(m.id, 40), thread:cleanStr(m.threadId, 40), date:dateOf(m.internalDate), amount:p.amount, content:cleanStr(p.content, 140), from:cleanStr(parseFrom(hdr(m, 'from')).name, 60) });
+          });
+        }
+        if (gFeat('leads')){
+          var ll = await gGet('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=25&q=' + encodeURIComponent(LEAD_Q));
+          var lm = await pool((ll.messages || []).map(function(x){ return x.id; }), 5, function(id){ return gGet('https://gmail.googleapis.com/gmail/v1/users/me/messages/' + id + '?format=metadata&metadataHeaders=From&metadataHeaders=Subject'); });
+          var byMail = {};
+          lm.forEach(function(m){
+            if (!m) return;
+            var f = parseFrom(hdr(m, 'from'));
+            if (!f.email || /no-?reply|noreply|notification|mailer-daemon/i.test(f.email) || BANK_RE.test(f.email)) return;
+            if (byMail[f.email]) return; byMail[f.email] = 1;
+            data.leads.push({ id:cleanStr(m.id, 40), thread:cleanStr(m.threadId, 40), date:dateOf(m.internalDate), name:cleanStr(f.name, 80), email:cleanStr(f.email, 120), subject:cleanStr(hdr(m, 'subject'), 160), snippet:cleanStr((m.snippet || '').replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&'), 220) });
+          });
+        }
+        gmail = data; lsSet(GM_KEY, JSON.stringify(gmail));
+        if (manual) toast('Đã đọc Gmail: ' + bankPending().length + ' khoản tiền, ' + leadsPending().length + ' khách hỏi');
+      }catch(err){ if (err.message !== 'auth') gmState.error = 'Chưa đọc được Gmail (' + err.message + ').'; }
+      gmState.loading = false; renderAll();
+    }
+    function bankPending(){
+      if (!gmail || !gFeat('bank')) return [];
+      var done = {}; state.txs.forEach(function(t){ if (t.src) done[t.src] = 1; });
+      return gmail.bank.filter(function(b){ return !done['gm:' + b.id] && gSeen.indexOf(b.id) < 0; });
+    }
+    function leadsPending(){
+      if (!gmail || !gFeat('leads')) return [];
+      var mails = {}; state.jobs.forEach(function(j){ if (j.email) mails[String(j.email).toLowerCase()] = 1; });
+      return gmail.leads.filter(function(l){ return !mails[l.email] && gSeen.indexOf(l.id) < 0; });
+    }
+    function gmailLink(thread){ return 'https://mail.google.com/mail/u/0/#all/' + encodeURIComponent(thread); }
+
+    /* ---------- Hiển thị: Tiền bạc (tiền về) + Buổi chụp (khách hỏi) + Hôm nay ---------- */
+    function permCard(text){ return '<div class="list" style="padding:14px 16px;display:flex;gap:12px;align-items:center;"><span class="ic bg-orange">' + I('bell') + '</span><div style="flex:1;font-size:15px;">' + text + '</div><button type="button" class="btn fill sm" data-gperm="1">Cấp quyền</button></div>'; }
+    function renderGx(){
+      /* Tiền về */
+      var bx = $('#gmBank');
+      if (bx){
+        var hb = '';
+        if (gFeat('bank') && state.cfg.gClientId){
+          if (!gToken() && !gmail) hb = '';
+          else if (gNeeds('bank')) hb = '<div class="sec-h"><h2>Tiền về từ Gmail</h2></div>' + permCard('Cần cho phép đọc Gmail để tìm email báo tiền về.');
+          else {
+            var pend = bankPending();
+            hb = '<div class="sec-h"><h2>Tiền về từ Gmail</h2><button class="link" type="button" data-gmre="1">' + (gmState.loading ? 'Đang đọc…' : 'Làm mới') + '</button></div>';
+            if (gmState.error) hb += '<p class="sec-f red" style="margin-top:0;">' + esc(gmState.error) + '</p>';
+            hb += pend.length ? '<div class="list">' + pend.slice(0, 20).map(function(b){
+              var j = matchJob(b.amount, b.content);
+              return '<button type="button" class="row" data-gmb="' + esc(b.id) + '"><span class="ic round bg-green">' + I('inarrow', 2.4) + '</span><span class="txt"><span class="t1 b num" style="display:block;">+' + fmt(b.amount) + '</span><span class="t2" style="display:block;">' + esc(fmtRel(b.date) + (b.content ? ' · ' + b.content : '')) + '</span></span>' +
+                (j ? '<span class="tagp tg-green clip" style="max-width:34%;">' + esc(j.client) + '</span>' : '<span class="tagp tg-gray">Chưa rõ</span>') + I('chev').replace('<svg', '<svg class="chev"') + '</button>';
+            }).join('') + '</div><p class="sec-f">App đoán khách theo nội dung chuyển khoản và số tiền — chạm để xem lại rồi ghi vào sổ.</p>'
+              : '<div class="list"><div class="empty-row muted" style="font-size:15px;">' + (gmail ? 'Không có khoản tiền mới nào chưa ghi sổ.' : 'Bấm Làm mới để đọc email ngân hàng.') + '</div></div>';
+          }
+        }
+        bx.innerHTML = hb;
+      }
+      /* Khách hỏi chụp */
+      var lx = $('#gmLeads');
+      if (lx){
+        var hl = '';
+        if (gFeat('leads') && state.cfg.gClientId && jobsMode !== 'cal'){
+          if (gNeeds('leads')) hl = permCard('Cần cho phép đọc Gmail để tìm khách hỏi chụp.');
+          else {
+            var lp = leadsPending();
+            if (lp.length) hl = '<p class="sec-s" style="margin-top:0;display:flex;justify-content:space-between;"><span>Khách hỏi qua Gmail · ' + lp.length + '</span><button type="button" class="link" data-gmre="1" style="border:0;background:none;color:var(--accent);font-size:13px;">' + (gmState.loading ? 'Đang đọc…' : 'Làm mới') + '</button></p><div class="list">' + lp.slice(0, 10).map(function(l){
+              return '<button type="button" class="row" data-gml="' + esc(l.id) + '"><span class="ic bg-purple">' + I('mail') + '</span><span class="txt"><span class="t1 b clip" style="display:block;">' + esc(l.name) + '</span><span class="t2 clip" style="display:block;">' + esc(fmtRel(l.date) + ' · ' + (l.subject || l.snippet)) + '</span></span>' + I('chev').replace('<svg', '<svg class="chev"') + '</button>';
+            }).join('') + '</div>';
+          }
+        }
+        lx.innerHTML = hl; lx.style.marginTop = hl ? '14px' : '0';
+      }
+      $$('[data-gperm]').forEach(function(b){ if (b._g) return; b._g = 1; b.addEventListener('click', function(){ gConnect(false); }); });
+      $$('[data-gmre]').forEach(function(b){ if (b._g) return; b._g = 1; b.addEventListener('click', function(){ if (gToken()) gmFetch(true); else gConnect(true); }); });
+      $$('[data-gmb]').forEach(function(b){ if (b._g) return; b._g = 1; b.addEventListener('click', function(){ openBank(b.getAttribute('data-gmb')); }); });
+      $$('[data-gml]').forEach(function(b){ if (b._g) return; b._g = 1; b.addEventListener('click', function(){ openLead(b.getAttribute('data-gml')); }); });
+    }
+    function openBank(id){
+      var b = (gmail && gmail.bank || []).filter(function(x){ return x.id === id; })[0]; if (!b) return;
+      var j = matchJob(b.amount, b.content);
+      actionSheet({ title:'+' + fmt(b.amount) + ' · ' + fmtHeaderDate(b.date), msg:(b.content ? 'Nội dung: ' + b.content : 'Không có nội dung') + (j ? '\nĐoán là: ' + j.client + ' (' + catFor(j) + ')' : ''), actions:[
+        { label:'Ghi vào sổ…', fn:function(){ openTxForm({ kind:'thu', jobId:j ? j.id : '', amount:b.amount, category:catFor(j), date:b.date, note:(b.content || 'Tiền về') + ' (Gmail)', src:'gm:' + b.id }); } },
+        { label:'Xem email', fn:function(){ window.open(gmailLink(b.thread), '_blank'); } },
+        { label:'Bỏ qua khoản này', destructive:true, fn:function(){ gSeenAdd(b.id); renderAll(); toast('Đã bỏ qua', 'del'); } }
+      ] });
+    }
+    function openLead(id){
+      var l = (gmail && gmail.leads || []).filter(function(x){ return x.id === id; })[0]; if (!l) return;
+      var type = guessType(l.subject + ' ' + l.snippet), ct = contactFor(l.name, l.email);
+      actionSheet({ title:l.name + ' · ' + l.email, msg:l.subject + (l.snippet ? '\n' + l.snippet : ''), actions:[
+        { label:'Tạo buổi chụp (Tư vấn)…', fn:function(){ openJobForm(null, { client:l.name, email:l.email, phone:ct ? ct.p : '', type:type, stage:'Tư vấn', price:state.cfg.prices[type] || 0, note:'Hỏi qua Gmail: ' + l.subject + (l.snippet ? '\n' + l.snippet : '') }); gSeenAdd(l.id); } },
+        { label:'Mở trong Gmail', fn:function(){ window.open(gmailLink(l.thread), '_blank'); } },
+        { label:'Không phải khách — bỏ qua', destructive:true, fn:function(){ gSeenAdd(l.id); renderAll(); toast('Đã bỏ qua', 'del'); } }
+      ] });
+    }
+
+    /* ---------- Danh bạ ---------- */
+    async function ctFetch(manual){
+      if (!gToken() || !gHas(SC.contacts) || !gFeat('contacts')) return;
+      try{
+        var out = [], page = '', n = 0;
+        do {
+          var r = await gGet('https://people.googleapis.com/v1/people/me/connections?pageSize=1000&personFields=names,emailAddresses,phoneNumbers' + (page ? '&pageToken=' + encodeURIComponent(page) : ''));
+          (r.connections || []).forEach(function(p){
+            var name = p.names && p.names[0] && p.names[0].displayName; if (!name) return;
+            out.push({ n:cleanStr(name, 80), e:cleanStr(p.emailAddresses && p.emailAddresses[0] && p.emailAddresses[0].value, 120).toLowerCase(), p:cleanStr(p.phoneNumbers && p.phoneNumbers[0] && p.phoneNumbers[0].value, 30).replace(/[^\d+]/g, '') });
+          });
+          page = r.nextPageToken || ''; n++;
+        } while (page && n < 4);
+        gContacts = out; lsSet(GCT_KEY, JSON.stringify(out));
+        if (manual) toast('Đã tải ' + out.length + ' liên hệ từ danh bạ');
+      }catch(err){ if (manual && err.message !== 'auth') toast('Chưa tải được danh bạ (' + err.message + ')', 'warn'); }
+    }
+    function contactFor(name, email){
+      var n = norm(name), e = String(email || '').toLowerCase();
+      return gContacts.filter(function(c){ return (e && c.e === e) || (n && norm(c.n) === n); })[0] || null;
+    }
+    function gContactsBind(f){
+      if (!gFeat('contacts') || !gContacts.length) return;
+      var dl = document.createElement('datalist'); dl.id = 'gContactList';
+      dl.innerHTML = gContacts.slice(0, 1500).map(function(c){ return '<option value="' + esc(c.n) + '"></option>'; }).join('');
+      f.appendChild(dl); f.elements.client.setAttribute('list', 'gContactList');
+      f.elements.client.addEventListener('change', function(){
+        var c = contactFor(f.elements.client.value, ''); if (!c) return;
+        var filled = [];
+        if (c.p && f.elements.phone && !f.elements.phone.value){ f.elements.phone.value = c.p; filled.push('điện thoại'); }
+        if (c.e && !f.elements.email.value){ f.elements.email.value = c.e; filled.push('email'); }
+        if (filled.length) toast('Đã điền ' + filled.join(' + ') + ' từ danh bạ');
+      });
+    }
+
+    /* ---------- Drive: chọn thư mục của job ---------- */
+    function openDrivePicker(j){
+      if (!state.cfg.gClientId){ toast('Thiết lập kết nối Google trong Cài đặt trước nha', 'warn'); return; }
+      if (!gToken() || !gHas(SC.drive)){ actionSheet({ title:'Cần cho phép xem tên thư mục Drive', msg:'App chỉ xem tên và link thư mục, không mở hay sửa file.', actions:[{ label:'Kết nối Google', fn:function(){ if (!gFeat('drive')){ state.cfg.gFeat.drive = true; saveLocal(); } gConnect(false); } }] }); return; }
+      var body = '<form id="drvForm" autocomplete="off"><div class="list" style="margin-top:8px;"><label class="frow full"><input name="q" value="' + esc(cleanClient(j.client).split(/\s*[&,]\s*/)[0]) + '" placeholder="Tìm thư mục theo tên…" enterkeyhint="search" /></label></div></form><div id="drvList" style="margin-top:12px;"></div>';
+      openSheet({ title:'Chọn thư mục Drive', left:'Huỷ', tall:true, body:body, bind:function(api){
+        var f = $('#drvForm', api.body), box = $('#drvList', api.body), seq = 0;
+        async function search(){
+          var my = ++seq, q = f.elements.q.value.trim().replace(/['\\]/g, '');
+          box.innerHTML = '<p class="sec-f" style="text-align:center;">Đang tìm…</p>';
+          try{
+            var r = await gGet('https://www.googleapis.com/drive/v3/files?pageSize=30&orderBy=modifiedTime%20desc&fields=files(id,name,webViewLink,modifiedTime)&q=' + encodeURIComponent("mimeType='application/vnd.google-apps.folder' and trashed=false" + (q ? " and name contains '" + q + "'" : '')));
+            if (my !== seq) return;
+            var files = r.files || [];
+            box.innerHTML = files.length ? '<div class="list">' + files.map(function(x, i){ return '<button type="button" class="row" data-drv="' + i + '"><span class="ic bg-green">' + I('folder') + '</span><span class="txt"><span class="t1 clip" style="display:block;">' + esc(x.name) + '</span><span class="t2" style="display:block;">Sửa ' + esc(fmtRel(dateOf(Date.parse(x.modifiedTime)))) + '</span></span></button>'; }).join('') + '</div>'
+              : '<div class="list"><div class="empty-row muted">Không thấy thư mục nào' + (q ? ' tên có “' + esc(q) + '”' : '') + '.</div></div>';
+            $$('[data-drv]', box).forEach(function(b){ b.addEventListener('click', function(){
+              var x = files[+b.getAttribute('data-drv')]; var link = safeUrl(x.webViewLink);
+              if (!link) return; j.driveLink = link; saveLocal(); api.close(); refreshJobSheet(); toast('Đã gắn thư mục “' + x.name + '”');
+            }); });
+          }catch(err){ if (my === seq) box.innerHTML = '<p class="sec-f red">' + (err.message === 'auth' ? 'Kết nối Google đã hết hạn — bấm Kết nối lại trong Cài đặt.' : 'Chưa tìm được (' + esc(err.message) + ').') + '</p>'; }
+        }
+        f.addEventListener('submit', function(e){ e.preventDefault(); search(); });
+        var tmr; f.elements.q.addEventListener('input', function(){ clearTimeout(tmr); tmr = setTimeout(search, 450); });
+        search();
+      } });
+    }
+
+    /* ---------- Gắn vào app ---------- */
+    var _rhx = renderHome;
+    renderHome = function(){
+      _rhx();
+      var tl = $('#todayList'), add = '';
+      var bp = bankPending().length, lp = leadsPending().length;
+      if (bp) add += '<button type="button" class="row" data-goto2="money"><span class="ic bg-green">' + I('inarrow') + '</span><span class="txt"><span class="t1 b" style="display:block;">' + bp + ' khoản tiền mới từ Gmail chưa ghi sổ</span><span class="t2" style="display:block;">Chạm để xem và ghi vào sổ</span></span>' + I('chev').replace('<svg', '<svg class="chev"') + '</button>';
+      if (lp) add += '<button type="button" class="row" data-goto2="jobs"><span class="ic bg-purple">' + I('mail') + '</span><span class="txt"><span class="t1 b" style="display:block;">' + lp + ' khách hỏi chụp qua Gmail</span><span class="t2" style="display:block;">Chạm để tạo buổi chụp</span></span>' + I('chev').replace('<svg', '<svg class="chev"') + '</button>';
+      if (add){ if (tl.querySelector('.empty-row')) tl.innerHTML = ''; tl.insertAdjacentHTML('afterbegin', add); $$('[data-goto2]', tl).forEach(function(b){ b.addEventListener('click', function(){ jobsMode = 'list'; go(b.getAttribute('data-goto2')); }); }); }
+    };
+    var _rmx = renderMoney; renderMoney = function(){ _rmx(); renderGx(); };
+    var _rjx = renderJobs; renderJobs = function(){ _rjx(); renderGx(); };
+    async function gSyncAll(manual){
+      if (!gToken()) return;
+      if (gFeat('cal') && gHas(SC.cal) && typeof gFetch === 'function') await gFetch(manual);
+      if ((gFeat('bank') || gFeat('leads')) && gHas(SC.gmail)) await gmFetch(manual);
+      if (gFeat('contacts') && gHas(SC.contacts) && (manual || !gContacts.length)) await ctFetch(manual);
+    }
+    renderAll();
+    if (gToken() && (!gmail || Date.now() - gmail.fetchedAt > 15 * 60000)) setTimeout(function(){ gSyncAll(false); }, 800);
     </script>
 
     <script>
