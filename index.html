@@ -374,6 +374,50 @@
       .switch::after{ content:""; position:absolute; top:2px; left:2px; width:27px; height:27px; border-radius:50%; background:#fff; box-shadow:0 3px 8px rgba(0,0,0,.15), 0 1px 1px rgba(0,0,0,.06); transition:transform .2s ease; }
       .switch:checked{ background:var(--green); }
       .switch:checked::after{ transform:translateX(20px); }
+      /* ---------- Hoa cánh bướm ---------- */
+      .lt{ position:relative; }
+      .lt-flowers{ position:absolute; right:-8px; top:-2px; width:118px; height:88px; pointer-events:none; }
+      .lt-flowers svg{ width:100%; height:100%; transform-origin:70% 100%; animation:sway 6s ease-in-out infinite; }
+      @keyframes sway{ 50%{ transform:rotate(-3deg); } }
+      .fl{ transform-box:fill-box; transform-origin:center; animation:bloom 1s cubic-bezier(.2,1.4,.4,1) both; }
+      @keyframes bloom{ from{ transform:scale(.1) rotate(-70deg); opacity:0; } to{ transform:none; opacity:1; } }
+      .sample-bn{ margin-top:16px; padding:14px 16px 16px; box-shadow:0 0 0 1.5px color-mix(in srgb, var(--orange) 45%, transparent); }
+      .sample-bn .b{ margin:9px 0 2px; font-size:17px; }
+      .sample-bn .t2{ font-size:14px; margin-bottom:12px; line-height:1.4; }
+      /* ---------- Màn chào mừng ---------- */
+      .welcome{ position:fixed; inset:0; z-index:300; display:flex; flex-direction:column; overflow:hidden; opacity:0; transition:opacity .4s ease;
+        background:radial-gradient(130% 70% at 50% 0%, #FFD6E8 0%, #FFF0F4 48%, var(--bg) 100%); }
+      @media (prefers-color-scheme: dark){ .welcome{ background:radial-gradient(130% 70% at 50% 0%, #4A2438 0%, #26181F 52%, var(--bg) 100%); } }
+      .welcome.on{ opacity:1; }
+      .wl-skip{ position:absolute; top:calc(env(safe-area-inset-top) + 4px); right:8px; z-index:3; border:0; background:none; color:#C2457F; font-size:17px; font-weight:500; min-height:44px; padding:0 12px; }
+      .wl-pages{ flex:1; display:flex; overflow-x:auto; overflow-y:hidden; scroll-snap-type:x mandatory; scrollbar-width:none; position:relative; z-index:2; }
+      .wl-pages::-webkit-scrollbar{ display:none; }
+      .wl-page{ flex:none; width:100%; scroll-snap-align:center; overflow-y:auto; padding:calc(env(safe-area-inset-top) + 40px) 22px 12px; }
+      .wl-in{ max-width:460px; margin:0 auto; text-align:center; }
+      .bouquet{ display:block; width:100%; max-width:340px; height:auto; margin:0 auto; filter:drop-shadow(0 10px 20px rgba(200,60,120,.18)); }
+      .bouquet.small{ max-width:230px; }
+      .wl-page:not(.seen) .fl{ animation:none; opacity:0; }
+      .wl-eyebrow{ font-size:13px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#C2457F; margin-top:4px; }
+      .welcome h1{ font-size:31px; line-height:1.2; font-weight:800; margin-top:6px; }
+      .welcome h1 em{ font-family:var(--serif); font-style:italic; font-weight:600; color:#D63F86; font-size:1.18em; }
+      .welcome h2{ font-size:28px; font-weight:800; margin-top:8px; }
+      .wl-sub{ color:var(--label2); font-size:16px; line-height:1.5; margin-top:10px; }
+      .wl-tag{ display:inline-block; margin-top:14px; padding:5px 14px; border-radius:999px; background:rgba(214,63,134,.12); color:#C2457F; font-weight:600; font-size:14px; }
+      .wl-mini{ width:96px; height:96px; margin:0 auto; }
+      .wl-mini svg{ width:100%; height:100%; filter:drop-shadow(0 6px 12px rgba(0,0,0,.18)); animation:bob 2.8s ease-in-out infinite; }
+      .wl-list{ text-align:left; margin-top:16px; }
+      .wl-choices{ display:flex; flex-direction:column; gap:10px; margin-top:20px; }
+      .wl-choices .btn.fill{ background:linear-gradient(135deg, #E0559A, #C2457F); color:#fff; box-shadow:0 8px 20px rgba(214,63,134,.3); }
+      .wl-foot{ position:relative; z-index:2; width:100%; max-width:460px; margin:0 auto; padding:10px 22px calc(14px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; align-items:center; gap:12px; }
+      .wl-foot .btn.fill{ background:linear-gradient(135deg, #E0559A, #C2457F); color:#fff; box-shadow:0 8px 20px rgba(214,63,134,.3); }
+      .wl-dots{ display:flex; gap:7px; }
+      .wl-dots i{ width:7px; height:7px; border-radius:4px; background:var(--label3); transition:all .25s ease; }
+      .wl-dots i.on{ width:22px; background:#D63F86; }
+      .petals{ position:absolute; inset:0; z-index:1; pointer-events:none; overflow:hidden; }
+      .petal{ position:absolute; top:-50px; animation:fall linear infinite; }
+      .petal > span{ display:block; animation:flutter ease-in-out infinite alternate; }
+      @keyframes fall{ to{ transform:translateY(calc(100vh + 100px)) rotate(420deg); } }
+      @keyframes flutter{ from{ transform:translateX(-18px) rotate(-22deg); } to{ transform:translateX(18px) rotate(26deg); } }
       .foot{ text-align:center; color:var(--label3); font-size:12px; margin-top:30px; line-height:1.5; }
       @media (min-width:700px){
         .hero img{ height:300px; }
@@ -401,6 +445,13 @@
           <p class="eyebrow" id="dateLine">Hôm nay</p>
           <h1>Chào <em>Xèo</em></h1>
           <p class="lt-sub" id="greetLine">Sadako Photography</p>
+        </div>
+
+        <div class="list sample-bn hidden" id="sampleBanner">
+          <span class="tagp tg-orange">Đang xem dữ liệu mẫu</span>
+          <p class="b">Mấy job và khoản tiền đang thấy chỉ là ví dụ</p>
+          <p class="t2 muted">Xem cho biết app chạy sao. Dùng thật thì xoá đi — cài đặt giá, cọc, thiết bị vẫn giữ nguyên.</p>
+          <button type="button" class="btn fill" id="sampleUseReal">Dùng thật — xoá dữ liệu mẫu</button>
         </div>
 
         <div class="list banner hidden" id="installCard">
@@ -521,6 +572,7 @@
         <p class="sec-s">Cài đặt</p>
         <div class="list">
           <button class="row" type="button" id="settingsRow"><span class="ic bg-gray" data-i="gear"></span><span class="txt"><span class="t1" style="display:block;">Thông số của Xèo</span><span class="t2" style="display:block;">Giá gói, phụ phí, cọc, hạn giao, thiết bị, chi cố định</span></span><span class="chev" data-i="chev"></span></button>
+          <button class="row" type="button" id="guideRow"><span class="ic bg-pink" data-i="sparkle"></span><span class="txt"><span class="t1" style="display:block;">Hướng dẫn sử dụng</span><span class="t2" style="display:block;">Xem lại màn chào mừng và các mẹo</span></span><span class="chev" data-i="chev"></span></button>
         </div>
 
         <p class="sec-s">Dữ liệu &amp; sao lưu</p>
@@ -945,7 +997,7 @@
       }); });
     }
     function renderHome(){
-      applyTheme(); renderQuote();
+      applyTheme(); renderQuote(); if (typeof renderSampleBanner === 'function') renderSampleBanner();
       var ig = state.cfg.instagram || 'xeonong';
       $('#igLink').href = 'https://www.instagram.com/' + encodeURIComponent(ig) + '/';
       $$('.igName').forEach(function(x){ x.textContent = ig; });
@@ -2165,6 +2217,141 @@
     $('#quoteStk').addEventListener('click', function(){ quoteOffset++; renderQuote(); });
     $('#quoteCopy').addEventListener('click', function(){ copyText($('#quoteText').textContent, 'Đã chép câu nói — gửi bạn bè cười chung'); });
     renderAll();
+    </script>
+
+    <script>
+    /* ================= HOA CÁNH BƯỚM + MÀN CHÀO MỪNG + DỮ LIỆU MẪU ================= */
+    var PETAL = 'M0 0C-9-5-12-20-9-29L-5-26-1.5-30.5 2-26.5 5.5-29.5 9-28C11-19 8-5 0 0Z';
+    var COSMOS_COLORS = ['#F7A1C4', '#E0559A', '#FFF1F7', '#F9C6DD', '#D63F86', '#FBD3E4'];
+    function cosmos(x, y, r, color, rot, delay){
+      var petals = '';
+      for (var i = 0; i < 8; i++){
+        var a = i * 45 + ((i * 37) % 9 - 4);
+        petals += '<g transform="rotate(' + a + ')"><path d="' + PETAL + '" fill="' + color + '" stroke="rgba(255,255,255,.75)" stroke-width=".6"/><path d="M0-3V-24M-2-5-4-22M2-5 4-22" stroke="rgba(150,20,80,.22)" stroke-width=".8" fill="none"/></g>';
+      }
+      var dots = '';
+      for (var k = 0; k < 10; k++){ var t = k * 36 * Math.PI / 180; dots += '<circle cx="' + (Math.cos(t) * 4.8).toFixed(2) + '" cy="' + (Math.sin(t) * 4.8).toFixed(2) + '" r=".95" fill="#FFE07A"/>'; }
+      return '<g transform="translate(' + x + ' ' + y + ') rotate(' + (rot || 0) + ') scale(' + (r / 30).toFixed(3) + ')"><g class="fl" style="animation-delay:' + (delay || 0) + 's">' + petals +
+        '<circle r="6.2" fill="#F6B21B"/><circle r="3.4" fill="#E08A00"/>' + dots + '</g></g>';
+    }
+    function fern(x, y, len, ang){
+      var p = 'M0 0L0 ' + (-len), i;
+      for (i = 1; i <= 5; i++){ var yy = -len * i / 6, l = len * (0.34 - i * 0.04); p += 'M0 ' + yy.toFixed(1) + 'l' + (-l).toFixed(1) + ' ' + (-l * 0.7).toFixed(1) + 'M0 ' + yy.toFixed(1) + 'l' + l.toFixed(1) + ' ' + (-l * 0.7).toFixed(1); }
+      return '<path transform="translate(' + x + ' ' + y + ') rotate(' + ang + ')" d="' + p + '" stroke="#6E9F55" stroke-width="1.6" fill="none" stroke-linecap="round"/>';
+    }
+    function bouquet(){
+      return '<svg viewBox="0 0 320 250" class="bouquet" aria-hidden="true">' +
+        '<path d="M160 250C158 200 120 160 86 120M160 250C162 196 170 150 168 96M160 250C166 204 206 168 236 128M160 250C150 214 112 196 54 186M160 250C172 216 226 206 270 196" stroke="#5E8F48" stroke-width="2.4" fill="none" stroke-linecap="round"/>' +
+        fern(120, 200, 40, -40) + fern(204, 204, 42, 38) + fern(140, 228, 34, -70) + fern(186, 230, 34, 72) + fern(96, 150, 30, -20) + fern(226, 156, 30, 24) +
+        cosmos(86, 112, 34, '#F7A1C4', 10, .15) + cosmos(168, 84, 42, '#E0559A', -8, 0) + cosmos(238, 120, 34, '#FFF1F7', 20, .3) +
+        cosmos(52, 182, 24, '#F9C6DD', -20, .45) + cosmos(272, 192, 25, '#D63F86', 30, .55) + cosmos(128, 160, 18, '#FBD3E4', 0, .7) + cosmos(206, 168, 17, '#F7A1C4', 15, .8) +
+        '<ellipse cx="300" cy="150" rx="5" ry="8" fill="#E0559A" transform="rotate(30 300 150)"/><ellipse cx="22" cy="140" rx="4.5" ry="7" fill="#F7A1C4" transform="rotate(-30 22 140)"/>' +
+        '</svg>';
+    }
+    function petalRain(container, n){
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      var html = '';
+      for (var i = 0; i < n; i++){
+        var s = 12 + Math.random() * 14, c = COSMOS_COLORS[Math.floor(Math.random() * COSMOS_COLORS.length)];
+        html += '<span class="petal" style="left:' + (Math.random() * 100).toFixed(1) + '%;animation-duration:' + (7 + Math.random() * 6).toFixed(1) + 's;animation-delay:' + (-Math.random() * 12).toFixed(1) + 's">' +
+          '<span style="animation-duration:' + (2.5 + Math.random() * 2).toFixed(1) + 's"><svg viewBox="-12 -32 24 34" width="' + s.toFixed(0) + '" height="' + (s * 1.4).toFixed(0) + '"><path d="' + PETAL + '" fill="' + c + '"/></svg></span></span>';
+      }
+      var layer = document.createElement('div'); layer.className = 'petals'; layer.setAttribute('aria-hidden', 'true'); layer.innerHTML = html;
+      container.appendChild(layer);
+      return layer;
+    }
+    /* Hoa cánh bướm nhỏ cạnh lời chào */
+    (function(){
+      var lt = $('#view-home .lt'); if (!lt) return;
+      var d = document.createElement('div'); d.className = 'lt-flowers'; d.setAttribute('aria-hidden', 'true');
+      d.innerHTML = '<svg viewBox="0 0 120 90">' + fern(70, 88, 28, -18) + fern(92, 88, 24, 30) +
+        '<path d="M80 90C78 70 66 56 50 46M80 90C82 72 92 56 100 40" stroke="#5E8F48" stroke-width="1.8" fill="none" stroke-linecap="round"/>' +
+        cosmos(50, 40, 22, '#F7A1C4', 12, 0) + cosmos(100, 34, 18, '#E0559A', -10, .2) + cosmos(76, 62, 12, '#FFF1F7', 0, .35) + '</svg>';
+      lt.appendChild(d);
+    })();
+
+    /* ---------- Dữ liệu mẫu → dùng thật ---------- */
+    function startReal(){
+      state.jobs = []; state.txs = []; state.sample = false;
+      Object.keys(checkDone).forEach(function(k){ if (k.indexOf('job:') === 0) delete checkDone[k]; });
+      checkSel = null; renderAll();
+    }
+    function askStartReal(){
+      actionSheet({ title:'Bắt đầu dùng thật?', msg:'Xoá ' + state.jobs.length + ' buổi chụp và ' + state.txs.length + ' khoản thu chi mẫu. Cài đặt giá, cọc, thiết bị vẫn giữ nguyên.',
+        actions:[{label:'Xoá dữ liệu mẫu', destructive:true, fn:function(){ startReal(); celebrate('Sổ trắng tinh rồi! Chúc Xèo nhiều khách', 'leeteuk'); }}] });
+    }
+    function renderSampleBanner(){ var b = $('#sampleBanner'); if (b) b.classList.toggle('hidden', !state.sample); }
+    $('#sampleUseReal').addEventListener('click', askStartReal);
+    renderSampleBanner();
+
+    /* ---------- Màn chào mừng + hướng dẫn sử dụng ---------- */
+    function guideRow(icon, color, title, sub){
+      return '<div class="row"><span class="ic bg-' + color + '">' + I(icon) + '</span><span class="txt"><span class="t1 b" style="display:block;">' + title + '</span><span class="t2" style="display:block;">' + sub + '</span></span></div>';
+    }
+    function openWelcome(opts){
+      opts = opts || {};
+      if ($('.welcome')) return;
+      var c = state.cfg, firstTime = !opts.guideOnly;
+      var pages = [
+        '<div class="wl-in">' + bouquet() +
+          '<p class="wl-eyebrow">' + esc(c.studio) + '</p>' +
+          '<h1>Chào mừng <em>' + esc(c.name) + '</em><br/>tới công ty nhỏ của mình</h1>' +
+          '<p class="wl-sub">Từ hôm nay ' + esc(c.name) + ' chỉ việc chụp thật đẹp. Giấy tờ, tiền bạc, nhắc việc — để cả nhà lo, sáu phòng ban trực sẵn rồi.</p>' +
+          '<p class="wl-tag">' + esc(c.tagline || '') + '</p></div>',
+        '<div class="wl-in"><div class="wl-mini">' + STK('leeteuk') + '</div><h2>Năm tab, năm người bạn</h2><p class="wl-sub">Thanh dưới cùng là năm tab, chạm là chuyển.</p><div class="list wl-list">' +
+          guideRow('sun', 'orange', 'Hôm nay', 'Việc cần nhớ, khách còn thiếu tiền, câu vui mỗi ngày') +
+          guideRow('cam', 'accent', 'Buổi chụp', 'Mỗi khách một dòng, 8 bước từ Tư vấn tới Xong, danh sách chuẩn bị đồ') +
+          guideRow('wallet', 'green', 'Tiền bạc', 'Sổ thu chi, lời từng job, lời tháng — app tự tính') +
+          guideRow('person', 'purple', 'Phòng ban', 'Sáu phòng báo cáo mỗi ngày, mẫu tin nhắn, máy tính giá, Góc E.L.F.') +
+          guideRow('bubble', 'blue', 'Trợ lý', 'Hỏi “ai chưa trả tiền?” hoặc ra lệnh “chi makeup 2 triệu”') + '</div></div>',
+        '<div class="wl-in"><div class="wl-mini">' + STK('kyuhyun') + '</div><h2>Vài mẹo nhỏ</h2><p class="wl-sub">Biết mấy cái này là dùng như dân chuyên.</p><div class="list wl-list">' +
+          guideRow('plusc', 'accent', 'Nút ＋ góc trên', 'Thêm buổi chụp mới, ghi khoản thu chi') +
+          guideRow('arrowr', 'gray', 'Chạm vào một dòng', 'Mở chi tiết: tiến độ, tiền, nhắn khách, lịch, Drive. Kéo xuống để đóng') +
+          guideRow('gear', 'gray', 'Bánh răng = Cài đặt', 'Giá gói, % cọc, số ngày giao ảnh, thiết bị, chi cố định, màu giao diện') +
+          guideRow('mic', 'red', 'Nói với trợ lý', 'Bấm micro rồi nói — app hiện chữ để Xèo duyệt rồi mới làm') +
+          guideRow('download', 'green', 'Sao lưu mỗi tuần', 'Phòng ban → Tải bản sao lưu. Đổi máy thì mở lại file đó') +
+          guideRow('share', 'blue', 'Cài lên màn hình chính', 'Bấm “Cài” ở trang Hôm nay — mở như app thật, chạy cả khi mất mạng') + '</div></div>',
+        '<div class="wl-in">' + bouquet().replace('class="bouquet"', 'class="bouquet small"') +
+          (firstTime && state.sample
+            ? '<h2>Sẵn sàng chưa ' + esc(c.name) + '?</h2><p class="wl-sub">App đang có vài job và khoản tiền <b>mẫu</b> để xem thử. Muốn dùng thật thì bắt đầu với sổ trống nhé.</p>' +
+              '<div class="wl-choices"><button type="button" class="btn fill" id="wlReal">Bắt đầu sổ trống — dùng thật</button><button type="button" class="btn gray" id="wlSample">Xem thử với dữ liệu mẫu trước</button></div>' +
+              '<p class="sec-f" style="text-align:center;">Xem thử xong, bấm “Dùng thật” ở dải trên cùng trang Hôm nay là xoá dữ liệu mẫu.</p>'
+            : '<h2>' + (firstTime ? 'Vào app thôi ' + esc(c.name) + '!' : 'Hết hướng dẫn rồi!') + '</h2><p class="wl-sub">Có gì quên thì vào Phòng ban → Hướng dẫn sử dụng để xem lại.</p>' +
+              '<div class="wl-choices"><button type="button" class="btn fill" id="wlGo">' + (firstTime ? 'Vào app' : 'Đóng hướng dẫn') + '</button></div>') +
+          '</div>'
+      ];
+      var w = document.createElement('div'); w.className = 'welcome'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-label', 'Chào mừng');
+      w.innerHTML = '<button type="button" class="wl-skip">' + (firstTime ? 'Bỏ qua' : 'Đóng') + '</button><div class="wl-pages">' +
+        pages.map(function(p, i){ return '<section class="wl-page' + (i === 0 ? ' seen' : '') + '">' + p + '</section>'; }).join('') +
+        '</div><div class="wl-foot"><div class="wl-dots">' + pages.map(function(_, i){ return '<i' + (i === 0 ? ' class="on"' : '') + '></i>'; }).join('') + '</div><button type="button" class="btn fill wl-next">Bắt đầu tham quan</button></div>';
+      document.body.appendChild(w);
+      petalRain(w, 22);
+      document.documentElement.classList.add('locked');
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){ w.classList.add('on'); }); });
+      var box = $('.wl-pages', w), dots = $$('.wl-dots i', w), next = $('.wl-next', w), cur = 0;
+      function setPage(i){
+        cur = i; dots.forEach(function(d, k){ d.classList.toggle('on', k === i); });
+        $$('.wl-page', w)[i].classList.add('seen');
+        next.style.visibility = i === pages.length - 1 ? 'hidden' : 'visible';
+        next.textContent = i === 0 ? 'Bắt đầu tham quan' : 'Tiếp';
+      }
+      box.addEventListener('scroll', function(){ var i = Math.round(box.scrollLeft / box.clientWidth); if (i !== cur) setPage(i); }, {passive:true});
+      next.addEventListener('click', function(){ box.scrollTo({left:(cur + 1) * box.clientWidth, behavior:'smooth'}); });
+      function close(msg, kind){
+        if (firstTime) lsSet('troLyXeo.welcomed', '2');
+        w.classList.remove('on'); document.documentElement.classList.remove('locked');
+        setTimeout(function(){ w.remove(); if (msg) celebrate(msg, kind || 'leeteuk'); }, 420);
+      }
+      $('.wl-skip', w).addEventListener('click', function(){ close(); });
+      var r = $('#wlReal', w), s = $('#wlSample', w), g = $('#wlGo', w);
+      if (r) r.addEventListener('click', function(){ startReal(); close('Sổ trắng tinh rồi! Chúc ' + c.name + ' đông khách', 'leeteuk'); });
+      if (s) s.addEventListener('click', function(){ close('Cứ bấm thử thoải mái nha!', 'donghae'); });
+      if (g) g.addEventListener('click', function(){ close(firstTime ? 'Chào mừng ' + c.name + '!' : '', 'siwon'); });
+      document.addEventListener('keydown', function esc2(e){ if (e.key === 'Escape' && document.body.contains(w)){ close(); document.removeEventListener('keydown', esc2); } });
+    }
+    $('#guideRow').addEventListener('click', function(){ openWelcome({guideOnly:true}); });
+    paintIcons();
+    if (lsGet('troLyXeo.welcomed') !== '2') setTimeout(function(){ openWelcome(); }, 250);
     </script>
 
     <script>

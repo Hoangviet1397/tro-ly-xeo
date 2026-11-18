@@ -60,6 +60,14 @@ Gõ tới đâu tự lưu tới đó.
 - Cài đặt nằm chung trong bản sao lưu JSON; "Xoá dữ liệu" không xoá cài đặt.
 - **Instagram @ và giới thiệu ngắn:** dùng cho mục Ảnh của Xèo, chân trang và tin nhắn mẫu cho khách hỏi giá.
 
+## Lần đầu mở app
+
+- **Màn chào mừng** hoa cánh bướm (bó hoa nở dần, cánh hoa rơi) + 3 trang hướng dẫn:
+  năm tab, vài mẹo nhỏ, rồi chọn **Bắt đầu sổ trống — dùng thật** hoặc **Xem thử với dữ liệu mẫu**.
+- Xem lại bất cứ lúc nào: Phòng ban → **Hướng dẫn sử dụng**.
+- Khi đang có dữ liệu mẫu, đầu trang Hôm nay có dải **"Đang xem dữ liệu mẫu"** với nút
+  **Dùng thật — xoá dữ liệu mẫu** (hỏi lại trước; cài đặt giá, cọc, thiết bị giữ nguyên).
+
 ## Vui mỗi ngày (E.L.F. mode)
 
 - **Câu của hôm nay** trên màn Hôm nay: mỗi ngày một câu vui về nghề chụp ảnh và Super Junior,
