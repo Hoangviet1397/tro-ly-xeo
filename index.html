@@ -337,6 +337,36 @@
       .hud .ic{ width:24px; height:24px; border-radius:50%; }
       .hud .ic svg{ width:14px; height:14px; }
 
+      /* ---------- Chủ đề Pearl Sapphire Blue (Super Junior) ---------- */
+      :root[data-theme="elf"]{ --accent:#2457A6; --accent-tint:rgba(36,87,166,.12); }
+      @media (prefers-color-scheme: dark){ :root[data-theme="elf"]{ --accent:#82B3F7; --accent-tint:rgba(130,179,247,.16); } }
+      /* ---------- Câu của hôm nay + sticker ---------- */
+      .quote{ display:flex; gap:12px; align-items:flex-start; padding:14px 14px 10px; margin-top:16px; }
+      .q-stk{ flex:none; width:80px; height:80px; border:0; background:none; padding:0; }
+      .q-stk svg, .stk-sm svg{ width:100%; height:100%; filter:drop-shadow(0 4px 8px rgba(0,0,0,.18)); animation:bob 2.8s ease-in-out infinite; }
+      .stk-sm{ flex:none; width:58px; height:58px; }
+      @keyframes bob{ 50%{ transform:translateY(-4px) rotate(-3deg); } }
+      .q-body{ flex:1; min-width:0; }
+      .q-lbl{ font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--accent); }
+      .q-txt{ font-size:16px; line-height:1.45; margin-top:3px; }
+      .q-act{ display:flex; gap:4px; margin-top:8px; margin-left:-4px; }
+      .q-act .btn.plain{ padding:0 10px; }
+      .stk-pop{ position:fixed; left:50%; top:42%; z-index:150; text-align:center; transform:translate(-50%,-50%) scale(.3); opacity:0;
+        transition:transform .5s cubic-bezier(.2,1.6,.4,1), opacity .25s ease; cursor:pointer; }
+      .stk-pop.on{ transform:translate(-50%,-50%) scale(1); opacity:1; }
+      .stk-pop svg{ width:150px; height:150px; margin:0 auto; filter:drop-shadow(0 10px 24px rgba(0,0,0,.25)); }
+      .stk-pop p{ display:inline-block; margin-top:4px; background:var(--bar-strong); -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px);
+        padding:9px 16px; border-radius:999px; font-weight:700; font-size:16px; box-shadow:0 8px 24px rgba(0,0,0,.18), 0 0 0 .5px var(--sep); white-space:nowrap; }
+      .bub.stkb{ background:none !important; box-shadow:none; padding:0; }
+      .bub.stkb svg{ width:112px; height:112px; filter:drop-shadow(0 4px 10px rgba(0,0,0,.18)); }
+      /* ---------- Checklist ---------- */
+      .ck-tap{ flex:1; min-width:0; display:flex; align-items:center; gap:13px; border:0; background:none; padding:0; text-align:left; min-height:30px; }
+      .ck-del{ flex:none; width:32px; height:32px; border:0; border-radius:50%; background:var(--fill); color:var(--label2); display:grid; place-items:center; }
+      .ck-del svg{ width:12px; height:12px; }
+      .switch{ -webkit-appearance:none; appearance:none; flex:none; width:51px; height:31px; border-radius:16px; background:var(--fill); position:relative; margin:0; cursor:pointer; transition:background-color .2s ease; }
+      .switch::after{ content:""; position:absolute; top:2px; left:2px; width:27px; height:27px; border-radius:50%; background:#fff; box-shadow:0 3px 8px rgba(0,0,0,.15), 0 1px 1px rgba(0,0,0,.06); transition:transform .2s ease; }
+      .switch:checked{ background:var(--green); }
+      .switch:checked::after{ transform:translateX(20px); }
       .foot{ text-align:center; color:var(--label3); font-size:12px; margin-top:30px; line-height:1.5; }
       @media (min-width:700px){
         .hero img{ height:300px; }
@@ -381,6 +411,18 @@
           <span class="hero-cap"><b>Ánh sáng đẹp nhất là để dành cho ảnh</b>Việc còn lại, cả nhà lo giúp Xèo.</span>
         </a>
 
+        <div class="list quote" id="quoteCard">
+          <button type="button" class="q-stk" id="quoteStk" aria-label="Đổi sticker và câu khác"></button>
+          <div class="q-body">
+            <p class="q-lbl" id="quoteLbl">Câu của hôm nay</p>
+            <p class="q-txt" id="quoteText"></p>
+            <div class="q-act">
+              <button type="button" class="btn tint sm" id="quoteNext">Câu khác</button>
+              <button type="button" class="btn plain sm" id="quoteCopy">Chép gửi bạn</button>
+            </div>
+          </div>
+        </div>
+
         <div class="tiles" id="homeStats"></div>
 
         <div class="sec-h" id="todaySec"><h2>Cần nhớ hôm nay</h2></div>
@@ -417,8 +459,8 @@
         <div class="pills" id="stageChips"></div>
         <div id="jobList" style="margin-top:14px;"></div>
 
-        <div class="sec-h"><h2>Chuẩn bị đồ</h2></div>
-        <div class="seg" id="checkTypeChips"></div>
+        <div class="sec-h"><h2>Chuẩn bị đồ</h2><button class="link" type="button" id="checkReset">Làm mới</button></div>
+        <div class="pills" id="checkTypeChips" style="margin-top:0;"></div>
         <div class="list" style="margin-top:12px;">
           <div style="padding:12px 16px 14px;">
             <div style="display:flex;justify-content:space-between;font-size:15px;"><span class="b" id="checkTitle">Chụp Portrait</span><span class="muted num" id="checkCount"></span></div>
@@ -601,7 +643,7 @@
       prices:{ Portrait:2500000, Couple:4000000, Wedding:15000000, Lookbook:8000000, Event:5000000 },
       extraHour:500000, extraLoc:700000, retouch:150000, album:2000000,
       depositPct:40, deliverDays:14,
-      equipment:[], fixed:[]
+      equipment:[], fixed:[], checkExtra:{}, theme:'elf', fun:true
     };
     function mergeCfg(c){
       var o = JSON.parse(JSON.stringify(DEFAULT_CFG));
@@ -677,6 +719,7 @@
     function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
     function lsSet(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
     if (!loadLocal()){ seed(); }
+    applyTheme();
 
     /* ================= TIỆN ÍCH ================= */
     function $(s, r){ return (r || document).querySelector(s); }
@@ -889,6 +932,7 @@
       }); });
     }
     function renderHome(){
+      applyTheme(); renderQuote();
       var ig = state.cfg.instagram || 'xeonong';
       $('#igLink').href = 'https://www.instagram.com/' + encodeURIComponent(ig) + '/';
       $$('.igName').forEach(function(x){ x.textContent = ig; });
@@ -905,7 +949,7 @@
       bindTiles($('#homeStats'));
       $('#todayList').innerHTML = items.length ? items.map(function(it){
         return '<button type="button" class="row" data-job="' + it.id + '"><span class="ic bg-' + it.c + '">' + I(it.icon) + '</span><span class="txt"><span class="t1 b" style="display:block;">' + esc(it.title) + '</span><span class="t2" style="display:block;">' + esc(it.desc) + '</span></span>' + I('chev').replace('<svg', '<svg class="chev"') + '</button>';
-      }).join('') : '<div class="empty-row"><span class="ic bg-green round">' + I('heart') + '</span><div><div class="b">Hôm nay thong thả lắm</div><div class="muted" style="font-size:14px;">Không có hạn nào dí hết. Pha trà, ngắm ảnh, nghĩ concept mới thôi.</div></div></div>';
+      }).join('') : '<div class="empty-row">' + (state.cfg.fun ? '<span class="stk-sm">' + STK('sleep') + '</span>' : '<span class="ic bg-green round">' + I('heart') + '</span>') + '<div><div class="b">Hôm nay thong thả lắm</div><div class="muted" style="font-size:14px;">Không có hạn nào dí hết. Pha trà, ngắm ảnh, nghĩ concept mới thôi.</div></div></div>';
       $('#deptMini').innerHTML = DEPTS.map(function(d){
         return '<button type="button" class="row" data-dept="' + d.id + '"><span class="ic round ltr bg-' + d.color + '">' + d.staff.charAt(0) + '</span><span class="txt"><span class="t1 b" style="display:block;">' + esc(d.name) + '</span><span class="t2 clip" style="display:block;">' + esc(deptLines(d.id)[0] || 'Đang rảnh, chờ lệnh của Xèo.') + '</span></span>' + I('chev').replace('<svg', '<svg class="chev"') + '</button>';
       }).join('');
@@ -915,6 +959,114 @@
       $$('[data-job]', root).forEach(function(b){ if (b._b) return; b._b = 1; b.addEventListener('click', function(){ openJob(b.getAttribute('data-job')); }); });
       $$('[data-dept]', root).forEach(function(b){ if (b._b) return; b._b = 1; b.addEventListener('click', function(){ openDept(b.getAttribute('data-dept')); }); });
     }
+    /* ================= VUI MỖI NGÀY: CÂU NÓI + STICKER E.L.F. =================
+       Sticker tự vẽ (SVG) theo phong cách fan Super Junior — màu Pearl Sapphire Blue.
+       Câu nói tự viết, chỉ nhắc tên thành viên / tên bài, không trích lời bài hát. */
+    var QUOTES = [
+      'Hôm nay chụp đẹp như Siwon cười quảng cáo — sáng chói tới mức khỏi cần hắt sáng.',
+      'Khách bảo “chụp tự nhiên thôi chị”, rồi tạo 47 dáng. Bình tĩnh, Leeteuk còn trông được cả chục đứa em mà.',
+      'Thẻ nhớ đầy thì xoá, deadline dí thì làm, còn Super Junior thì không bao giờ rời khỏi tim E.L.F.',
+      'Retouch mụn cho khách nhẹ tay thôi, đừng gắt như Heechul chấm điểm đồ ăn.',
+      'Mệt quá? Mở “Mr. Simple” lên, nhảy 3 phút, rồi quay lại cắt ảnh tiếp. Khoa học chứng minh rồi (khoa học của E.L.F.).',
+      'Khách hỏi “ảnh bao giờ xong ạ?” — trả lời kiểu Kyuhyun: tự tin, chậm rãi, và lấp lánh.',
+      'Pin dự phòng quan trọng như Shindong trong đội hình: thiếu là thấy trống liền.',
+      'Đời nhiếp ảnh gia: 1 buổi chụp, 2.000 tấm, khách chọn đúng tấm mình đang nhắm mắt.',
+      'Nắng vàng 5 giờ chiều đẹp như ánh mắt Donghae nhìn biển. Canh giờ đó mà bấm nha.',
+      'Không có góc xấu, chỉ có góc chưa được Xèo chỉnh.',
+      'Lời nhắc dịu dàng: khách chưa chuyển cọc thì mình chưa chuyển cảm xúc.',
+      'Hôm nay chăm như Eunhyuk tập nhảy: sai thì làm lại, không ai cười đâu (trừ Donghae).',
+      'Đừng thức khuya hậu kỳ nữa. Ryeowook hát ru giùm rồi đó, đi ngủ đi Xèo.',
+      'Concept hôm nay: “Sorry, Sorry” — xin lỗi mấy người mẫu khác, hôm nay khách của Xèo đẹp nhất.',
+      'Bỏ bữa sáng là bỏ năng lượng. Ăn đi rồi bấm máy, Bonamana!',
+      'Yesung nuôi rùa, Xèo nuôi deadline. Ai chậm hơn thì… chưa biết.',
+      'Black Suit cho chú rể, áo dài cho cô dâu, tóc rối cho nhiếp ảnh gia — combo ngày cưới chuẩn.',
+      'Ảnh đẹp không cần filter. Nhưng cần Xèo. Và cần khách trả đủ tiền.',
+      'Đếm tới 3 rồi bấm — khách vẫn chớp mắt đúng số 3. Định luật vũ trụ, không ai cãi được.',
+      'Hôm nay Xèo là “Devil” của ánh sáng: bắt chỗ nào dính chỗ đó.',
+      'Chụp couple cứ hô: “nhìn nhau như Donghae nhìn Eunhyuk” — tự nhiên liền, khỏi chỉnh dáng.',
+      'Mua lens mới không phải tiêu xài, là đầu tư. App ghi khấu hao giùm rồi, yên tâm mà mua.',
+      'Khách ưng ảnh thì E.L.F. vui, khách trả đủ tiền thì Lúa vui. Hôm nay cho cả hai cùng vui.',
+      'Chỉnh màu da kỹ như Siwon chọn góc mặt: lệch 0,5 độ cũng là chuyện lớn.',
+      'Kế hoạch hôm nay: 1) chụp đẹp 2) giao đúng hạn 3) xem lại MV cũ của Suju lúc 11 giờ đêm (tối đa 3 MV thôi nha).',
+      'Mưa thì chụp trong nhà, nắng thì chụp ngoài trời, buồn thì nghe Super Junior. Không ngày nào bỏ đi.',
+      'Nhiếp ảnh gia giỏi không phải người không bao giờ chụp hụt, mà là người xoá tấm hụt trước khi khách kịp thấy.',
+      'Tự tin như Heechul đứng trước gương. Mà Heechul nói đúng đó — mình đẹp thật.',
+      'Leeteuk dặn: ăn uống đầy đủ, nhớ uống nước. Thật ra Leeteuk không dặn, nhưng app dặn.',
+      'Khách trễ 30 phút? Xèo không chờ đâu — Xèo đang canh golden hour giùm họ thôi.',
+      'Khách: “Chị chỉnh em ốm xíu.” Xèo: “Xíu là mấy ký vậy em?”',
+      'Hồi xưa ôm loa nghe Suju, giờ cầm máy chụp ảnh cưới cho người ta. Thanh xuân không mất, chỉ đổi lens.',
+      'Album cưới in xong thơm mùi giấy mới — tiền khách chuyển cũng nên về thơm như vậy.',
+      'Hôm nay Kyuhyun không trả lời tin nhắn của Xèo, nhưng khách trả cọc rồi. Vậy là đủ vui.'
+    ];
+    var SJ_CHEERS = [
+      'E.L.F. ơi! Hôm nay Xèo làm việc chăm quá, thưởng một MV Super Junior trước khi ngủ nha.',
+      'Super Junior không ở đây, nhưng trợ lý E.L.F. thì có — cần tra gì cứ hỏi, xong việc rồi đu idol tiếp.',
+      'Màu của hôm nay là Pearl Sapphire Blue. Bật chủ đề Suju trong Cài đặt là app xanh lấp lánh liền.',
+      'Nhắc khẽ: chụp xong, chép thẻ, rồi mới được mở concert cũ ra xem. Có kỷ luật mới là E.L.F. xịn.'
+    ];
+    var STK_KINDS = ['elf', 'stick', 'cam', 'heart', 'party'];
+    function STK(kind){
+      var B = '#2E6BC6';
+      var BLOB = 'M48 28C70 28 82 43 82 61C82 77 67 87 48 87C29 87 14 77 14 61C14 43 26 28 48 28Z';
+      var eyes = kind === 'sleep'
+        ? '<path d="M33 60q5 4 10 0M53 60q5 4 10 0" stroke="#1d1a2e" stroke-width="2.6" fill="none" stroke-linecap="round"/><ellipse cx="48" cy="70" rx="2.6" ry="2" fill="#1d1a2e"/>'
+        : '<circle cx="38" cy="59" r="4.3" fill="#1d1a2e"/><circle cx="58" cy="59" r="4.3" fill="#1d1a2e"/><circle cx="39.6" cy="57.4" r="1.5" fill="#fff"/><circle cx="59.6" cy="57.4" r="1.5" fill="#fff"/>' +
+          (kind === 'cam' ? '' : '<path d="M43 67q5 5 10 0" fill="none" stroke="#1d1a2e" stroke-width="2.4" stroke-linecap="round"/>');
+      var blush = '<ellipse cx="30" cy="67" rx="5" ry="3" fill="#FF9DB5" opacity=".85"/><ellipse cx="66" cy="67" rx="5" ry="3" fill="#FF9DB5" opacity=".85"/>';
+      var back = '', front = '';
+      if (kind === 'elf'){
+        front = '<path d="M34 30l3.5-15 7 8.5 3.5-13 3.5 13 7-8.5 3.5 15z" fill="#F4C542" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><circle cx="48" cy="25" r="2.2" fill="#FF5C8A"/>' + '<text x="48" y="82" font-size="8.5" font-weight="800" text-anchor="middle" fill="#fff" font-family="ui-rounded,system-ui,sans-serif" letter-spacing=".5">E.L.F.</text>';
+      }
+      if (kind === 'stick'){
+        front = '<rect x="75" y="40" width="7" height="36" rx="3.5" fill="#2b2b33" stroke="#fff" stroke-width="3"/><circle cx="78.5" cy="31" r="12.5" fill="#5B9BF0" stroke="#fff" stroke-width="3.5"/><circle cx="78.5" cy="31" r="6" fill="#D6E7FF"/>' +
+          '<path d="M89 8l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#F4C542" stroke="#fff" stroke-width="1.5"/><path d="M64 12l1.3 3.2 3.2 1.3-3.2 1.3L64 21l-1.3-3.2-3.2-1.3 3.2-1.3z" fill="#F4C542"/>';
+      }
+      if (kind === 'cam'){
+        front = '<rect x="51" y="58" width="11" height="7" rx="2" fill="#2b2b33" stroke="#fff" stroke-width="2.5"/><rect x="28" y="63" width="40" height="24" rx="6" fill="#2b2b33" stroke="#fff" stroke-width="3.5"/><circle cx="48" cy="75" r="8" fill="#5B9BF0" stroke="#fff" stroke-width="3"/><circle cx="45.5" cy="72.5" r="2.2" fill="#fff" opacity=".8"/>';
+      }
+      if (kind === 'heart'){
+        back = '<path d="M77 26c-4-6-13-3-11 4 1 4 6 7 11 11 5-4 10-7 11-11 2-7-7-10-11-4z" fill="#FF5C8A" stroke="#fff" stroke-width="3.5" stroke-linejoin="round"/><path d="M19 22c-2.5-3.6-8-1.8-6.7 2.4.6 2.4 3.6 4.2 6.7 6.6 3-2.4 6-4.2 6.7-6.6C27 20.2 21.5 18.4 19 22z" fill="#FF8FB0" stroke="#fff" stroke-width="2.5"/>';
+      }
+      if (kind === 'party'){
+        front = '<path d="M39 32L52 5l9 27z" fill="#F4C542" stroke="#fff" stroke-width="3.5" stroke-linejoin="round"/><circle cx="52" cy="6" r="4.5" fill="#FF5C8A" stroke="#fff" stroke-width="2"/>' +
+          '<rect x="14" y="16" width="6" height="3" rx="1.5" fill="#FF5C8A" transform="rotate(-30 17 17)"/><rect x="76" y="12" width="6" height="3" rx="1.5" fill="#5B9BF0" transform="rotate(25 79 13)"/><circle cx="84" cy="30" r="2.5" fill="#F4C542"/><circle cx="10" cy="36" r="2.2" fill="#5B9BF0"/>';
+      }
+      if (kind === 'sleep'){
+        back = '<text x="68" y="25" font-size="17" font-weight="800" fill="' + B + '" stroke="#fff" stroke-width="3.5" paint-order="stroke" font-family="ui-rounded,system-ui,sans-serif">Zz</text>';
+      }
+      return '<svg viewBox="0 0 96 96" class="stk" aria-hidden="true">' + back +
+        '<path d="' + BLOB + '" fill="#fff" stroke="#fff" stroke-width="9" stroke-linejoin="round"/><path d="' + BLOB + '" fill="' + B + '"/>' +
+        '<ellipse cx="33" cy="41" rx="9" ry="5" fill="#fff" opacity=".32" transform="rotate(-25 33 41)"/>' + eyes + blush + front + '</svg>';
+    }
+    var quoteOffset = 0;
+    function dayNumber(){ var d = parseD(dstr(0)); return Math.floor(d.getTime() / 86400000 - d.getTimezoneOffset() / 1440); }
+    function renderQuote(){
+      var card = document.getElementById('quoteCard'); if (!card) return;
+      card.classList.toggle('hidden', !state.cfg.fun);
+      if (!state.cfg.fun) return;
+      var n = dayNumber() + quoteOffset, i = ((n * 7) % QUOTES.length + QUOTES.length) % QUOTES.length;
+      var h = new Date().getHours(), kind = (h >= 22 || h < 5) ? 'sleep' : STK_KINDS[((n % STK_KINDS.length) + STK_KINDS.length) % STK_KINDS.length];
+      document.getElementById('quoteText').textContent = QUOTES[i];
+      document.getElementById('quoteStk').innerHTML = STK(kind);
+      document.getElementById('quoteLbl').textContent = quoteOffset ? 'Thêm một câu nữa' : 'Câu của hôm nay';
+    }
+    function celebrate(text, kind){
+      if (!state.cfg.fun) return;
+      var old = document.querySelector('.stk-pop'); if (old) old.remove();
+      var d = document.createElement('div'); d.className = 'stk-pop'; d.setAttribute('role', 'status');
+      d.innerHTML = STK(kind || 'party') + '<p>' + esc(text) + '</p>';
+      document.body.appendChild(d);
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){ d.classList.add('on'); }); });
+      var gone = false, rm = function(){ if (gone) return; gone = true; d.classList.remove('on'); setTimeout(function(){ d.remove(); }, 300); };
+      d.addEventListener('click', rm); setTimeout(rm, 2300);
+      if (navigator.vibrate){ try{ navigator.vibrate([12, 60, 12]); }catch(e){} }
+    }
+    function addSticker(kind){
+      var box = document.getElementById('chatBox'); if (!box) return;
+      var d = document.createElement('div'); d.className = 'bub bot stkb'; d.innerHTML = STK(kind); box.appendChild(d);
+    }
+    function applyTheme(){ document.documentElement.setAttribute('data-theme', state.cfg.theme === 'rose' ? 'rose' : 'elf'); }
+
 </script>
 
     <script>
@@ -1062,7 +1214,9 @@
     }
     function jobAction(act, id){
       var j = jobById(id); if (!j) return;
-      if (act === 'next'){ var i = STAGES.indexOf(j.stage); if (i < STAGES.length-1){ j.stage = STAGES[i+1]; toast('“' + j.client + '” sang bước ' + j.stage); } renderAll(); }
+      if (act === 'next'){ var i = STAGES.indexOf(j.stage); if (i < STAGES.length-1){ j.stage = STAGES[i+1]; toast('“' + j.client + '” sang bước ' + j.stage); } renderAll();
+        if (j.stage === 'Đã giao') celebrate('Giao ảnh rồi! Thưởng 1 MV Suju nha', 'stick');
+        if (j.stage === 'Xong') celebrate('Xong job ' + j.client + '! E.L.F. tự hào ghê', 'party'); }
       if (act === 'prev'){ var k = STAGES.indexOf(j.stage); if (k > 0){ j.stage = STAGES[k-1]; toast('Đã lùi về bước ' + j.stage, 'warn'); } renderAll(); }
       if (act === 'del'){
         var n = state.txs.filter(function(t){ return String(t.jobId) === String(id); }).length;
@@ -1163,27 +1317,95 @@
       'Wedding': ['2 thân máy sẵn sàng, pin sạc đầy hết','Thẻ nhớ nhiều + đã format','Đèn flash + pin đèn','Lens 24-70 + 85mm','Timeline ngày cưới + danh sách người nhà cần chụp','Hợp đồng + số điện thoại phù rể / người điều phối','Đồ dự phòng: kim chỉ, băng keo, sạc dự phòng','Cọc đã nhận — kiểm tra trong tab Tiền bạc','Thỏa thuận giờ ăn / nghỉ của ê-kíp'],
       'Lookbook': ['Shot list từ shop đã in / lưu sẵn','Mẫu + makeup đã xác nhận giờ','Phông nền / studio đã đặt','Đèn studio + tản sáng','Sản phẩm đã ủi phẳng, đánh số thứ tự','Bàn là hơi / cây lăn bụi','Thỏa thuận số ảnh giao + hạn giao','Cọc đã nhận — kiểm tra trong tab Tiền bạc']
     };
-    var checkType = 'Portrait';
+    var checkSel = null;   /* 'job:<id>' = riêng một buổi chụp, 'type:<Loại>' = danh sách chung */
+    function shortName(s){ s = String(s).split(/s*[&,]s*/)[0]; return s.length > 16 ? s.slice(0, 15) + "…" : s; }
+    function listType(t){ return CHECKLISTS[t] ? t : 'Portrait'; }
+    function checkItems(t){ return CHECKLISTS[t].concat((state.cfg.checkExtra && state.cfg.checkExtra[t]) || []); }
+    function upcomingShoots(){
+      var t = dstr(0);
+      return state.jobs.filter(function(j){ return j.shootDate && j.shootDate >= t && STAGES.indexOf(j.stage) <= 3; })
+        .sort(function(a, b){ return a.shootDate < b.shootDate ? -1 : 1; }).slice(0, 5);
+    }
+    function migrateChecks(){
+      /* bản cũ lưu tick theo số thứ tự, theo loại chụp → đổi sang lưu theo tên món */
+      Object.keys(CHECKLISTS).forEach(function(t){
+        var old = checkDone[t]; if (!old || typeof old !== 'object') return;
+        var nu = checkDone['type:' + t] = checkDone['type:' + t] || {};
+        Object.keys(old).forEach(function(k){ if (old[k] && CHECKLISTS[t][+k]) nu[CHECKLISTS[t][+k]] = true; });
+        delete checkDone[t];
+      });
+    }
+    function checkContext(){
+      var up = upcomingShoots();
+      if (checkSel && checkSel.indexOf('job:') === 0){
+        var j = jobById(checkSel.slice(4));
+        if (!j) checkSel = null; else return {key:checkSel, job:j, type:listType(j.type), up:up};
+      }
+      if (!checkSel) checkSel = up.length ? 'job:' + up[0].id : 'type:Portrait';
+      if (checkSel.indexOf('job:') === 0){ var jj = jobById(checkSel.slice(4)); return {key:checkSel, job:jj, type:listType(jj.type), up:up}; }
+      return {key:checkSel, job:null, type:checkSel.slice(5), up:up};
+    }
     function renderChecklist(){
-      $('#checkTypeChips').innerHTML = Object.keys(CHECKLISTS).map(function(t){
-        return '<button type="button" class="' + (checkType === t ? 'on' : '') + '" data-ct="' + t + '">' + t + '</button>';
+      migrateChecks();
+      var c = checkContext(), items = checkItems(c.type), done = checkDone[c.key] || {};
+      var pills = c.up.map(function(j){ return {key:'job:' + j.id, label:shortName(j.client) + ' · ' + fmtRel(j.shootDate)}; });
+      if (c.job && !c.up.some(function(j){ return String(j.id) === String(c.job.id); })) pills.unshift({key:c.key, label:shortName(c.job.client)});
+      pills = pills.concat(Object.keys(CHECKLISTS).map(function(t){ return {key:'type:' + t, label:t}; }));
+      $('#checkTypeChips').innerHTML = pills.map(function(p){
+        var isJob = p.key.indexOf('job:') === 0;
+        return '<button type="button" class="pill' + (p.key === c.key ? ' on' : '') + '" data-cs="' + esc(p.key) + '">' + (isJob ? I('cam') .replace('<svg', '<svg style="width:15px;height:15px;"') : '') + esc(p.label) + '</button>';
       }).join('');
-      $$('#checkTypeChips button').forEach(function(c){ c.addEventListener('click', function(){ checkType = c.getAttribute('data-ct'); renderChecklist(); }); });
-      var items = CHECKLISTS[checkType], done = checkDone[checkType] || {};
-      var nDone = items.filter(function(_, i){ return done[i]; }).length;
-      $('#checkTitle').textContent = 'Chụp ' + checkType;
+      $$('#checkTypeChips .pill').forEach(function(b){ b.addEventListener('click', function(){ checkSel = b.getAttribute('data-cs'); renderChecklist(); }); });
+      var nDone = items.filter(function(it){ return done[it]; }).length;
+      $('#checkTitle').textContent = c.job ? c.job.client + ' · ' + c.type : 'Danh sách chung · ' + c.type;
       $('#checkBar').style.width = Math.round(nDone / items.length * 100) + '%';
       $('#checkCount').textContent = nDone + '/' + items.length;
-      $('#checkHint').textContent = nDone === items.length ? 'Xong hết rồi — xách máy đi thôi Xèo!' : 'Tick dần từng món, khỏi phải nhớ. Chạm lại để bỏ tick.';
+      $('#checkHint').textContent = nDone === items.length ? 'Xong hết rồi — xách máy đi thôi Xèo!'
+        : (c.job ? 'Danh sách riêng cho buổi này — buổi sau tự có danh sách mới, khỏi phải bỏ tick.' : 'Chọn một buổi chụp ở trên để có danh sách riêng cho buổi đó. Bấm “Làm mới” để bỏ tick hết.');
+      var extra = (state.cfg.checkExtra && state.cfg.checkExtra[c.type]) || [];
       $('#checkList').innerHTML = items.map(function(it, i){
-        return '<button type="button" class="row' + (done[i] ? ' done' : '') + '" data-ci="' + i + '" role="checkbox" aria-checked="' + (done[i] ? 'true' : 'false') + '"><span class="chk">' + I('check', 3) + '</span><span class="txt t1">' + esc(it) + '</span></button>';
-      }).join('');
-      $$('#checkList .row').forEach(function(b){ b.addEventListener('click', function(){
-        var i = b.getAttribute('data-ci'); checkDone[checkType] = checkDone[checkType] || {};
-        checkDone[checkType][i] = !checkDone[checkType][i]; renderChecklist(); saveLocal();
+        var mine = extra.indexOf(it) >= 0;
+        return '<div class="row' + (done[it] ? ' done' : '') + '" style="padding-right:8px;"><button type="button" class="ck-tap" data-ci="' + i + '" role="checkbox" aria-checked="' + (done[it] ? 'true' : 'false') + '"><span class="chk">' + I('check', 3) + '</span><span class="txt t1">' + esc(it) + '</span></button>' +
+          (mine ? '<button type="button" class="ck-del" data-cx="' + esc(it) + '" aria-label="Xoá món ' + esc(it) + '">' + I('xmark', 2.4) + '</button>' : '') + '</div>';
+      }).join('') + '<button type="button" class="row act" id="checkAdd"><span class="chk" style="border-style:dashed;color:var(--accent);">' + I('plus', 3) + '</span><span class="txt t1">Thêm món vào danh sách ' + esc(c.type) + '</span></button>';
+      $$('#checkList .ck-tap').forEach(function(b){ b.addEventListener('click', function(){
+        var it = items[+b.getAttribute('data-ci')]; checkDone[c.key] = checkDone[c.key] || {};
+        checkDone[c.key][it] = !checkDone[c.key][it]; saveLocal();
+        var all = items.every(function(x){ return checkDone[c.key][x]; });
+        renderChecklist();
+        if (all && checkDone[c.key][it]) celebrate('Đủ đồ rồi! Xách máy đi thôi', 'cam');
         if (navigator.vibrate){ try{ navigator.vibrate(6); }catch(e){} }
       }); });
+      $$('#checkList .ck-del').forEach(function(b){ b.addEventListener('click', function(){
+        var it = b.getAttribute('data-cx');
+        actionSheet({ title:'Xoá “' + it + '”?', msg:'Món này sẽ bỏ khỏi danh sách ' + c.type + ' cho mọi buổi chụp.', actions:[{label:'Xoá món này', destructive:true, fn:function(){
+          var arr = state.cfg.checkExtra[c.type] || []; arr.splice(arr.indexOf(it), 1); saveLocal(); renderChecklist(); toast('Đã xoá món', 'del');
+        }}] });
+      }); });
+      $('#checkAdd').addEventListener('click', function(){
+        openSheet({ title:'Thêm món', left:'Huỷ', right:'Thêm', body:'<form id="ckAddForm" autocomplete="off"><div class="list" style="margin-top:8px;"><label class="frow full"><input name="item" placeholder="VD: Quạt cầm tay, kẹp tóc, ô che nắng…" /></label></div><p class="sec-f">Món mới thêm vào danh sách ' + esc(c.type) + ', dùng cho mọi buổi chụp ' + esc(c.type) + ' sau này.</p></form>',
+          onRight:function(api){ $('#ckAddForm', api.body).requestSubmit(); },
+          bind:function(api){
+            var f = $('#ckAddForm', api.body);
+            f.addEventListener('submit', function(ev){
+              ev.preventDefault(); var v = f.elements.item.value.trim();
+              if (!v){ toast('Nhập tên món trước nha', 'warn'); return; }
+              state.cfg.checkExtra = state.cfg.checkExtra || {};
+              var arr = state.cfg.checkExtra[c.type] = state.cfg.checkExtra[c.type] || [];
+              if (checkItems(c.type).indexOf(v) >= 0){ toast('Món này có rồi', 'warn'); return; }
+              arr.push(v); saveLocal(); api.close(); renderChecklist(); toast('Đã thêm “' + v + '”');
+            });
+            setTimeout(function(){ try{ f.elements.item.focus({preventScroll:true}); }catch(err){} }, 450);
+          } });
+      });
     }
+    $('#checkReset').addEventListener('click', function(){
+      var c = checkContext(), done = checkDone[c.key] || {}, n = Object.keys(done).filter(function(k){ return done[k]; }).length;
+      if (!n){ toast('Danh sách đang trống sẵn rồi', 'warn'); return; }
+      actionSheet({ title:'Làm mới danh sách?', msg:'Bỏ tick ' + n + ' món của ' + (c.job ? 'buổi ' + c.job.client : 'danh sách chung ' + c.type) + '.', actions:[{label:'Bỏ tick hết', destructive:true, fn:function(){
+        delete checkDone[c.key]; saveLocal(); renderChecklist(); toast('Đã làm mới danh sách');
+      }}] });
+    });
 
     /* ================= TIỀN BẠC ================= */
     var txFilter = 'all';
@@ -1223,6 +1445,8 @@
         state.txs.unshift({ id:nid(), kind:kind, category:f.elements.category.value, jobId:f.elements.jobId.value || '', amount:amt,
           date:f.elements.date.value || dstr(0), method:f.elements.method.value, note:f.elements.note.value.trim() });
         api.close(); toast((kind === 'thu' ? 'Đã ghi khoản thu ' : 'Đã ghi khoản chi ') + fmt(amt)); renderAll();
+        var paidJob = f.elements.jobId.value ? jobById(f.elements.jobId.value) : null;
+        if (kind === 'thu' && paidJob && paidJob.price && jobOwe(paidJob) === 0) celebrate(paidJob.client + ' trả đủ rồi! Bonamana!', 'heart');
       }
       openSheet({ title:'Ghi thu chi', left:'Huỷ', right:'Lưu', body:body, onRight:save,
         bind:function(api){
@@ -1457,6 +1681,7 @@
     }
     function answer(qRaw){
       var q = norm(qRaw);
+      if (/suju|super ?junior|\belf\b|e\.l\.f|oppa|leeteuk|heechul|yesung|shindong|eunhyuk|donghae|siwon|ryeowook|kyuhyun/.test(q)) return SJ_CHEERS[Math.floor(Math.random() * SJ_CHEERS.length)];
       if (q.indexOf('chua tra') >= 0 || q.indexOf('con no') >= 0 || q.indexOf('no tien') >= 0 || q.indexOf('thieu tien') >= 0 || q.indexOf('ai no') >= 0) return debtorsText();
       if (q.indexOf('bao cao') >= 0) return dailyReportText();
       if (q.indexOf('hom nay') >= 0 && (q.indexOf('chup') >= 0 || q.indexOf('job') >= 0 || q.indexOf('viec') >= 0 || q.indexOf('lam gi') >= 0)){
@@ -1702,6 +1927,7 @@
       setNav();
       var day = document.createElement('p'); day.className = 'chat-day'; day.textContent = 'Hôm nay';
       $('#chatBox').appendChild(day);
+      if (state.cfg.fun) addSticker('elf');
       addBubble('Chào Xèo! Trợ lý đây. Cứ hỏi thoải mái — “Ai chưa trả tiền?”, “Tháng này lời bao nhiêu?” — hoặc ra lệnh như “chi makeup 2 triệu”.', 'bot');
     })();
 </script>
@@ -1729,6 +1955,10 @@
         frow('Instagram @', '<input data-cfg="instagram" value="' + esc(c.instagram) + '" placeholder="xeonong" autocapitalize="off" />') +
         frow('Giới thiệu', '<input data-cfg="tagline" value="' + esc(c.tagline) + '" placeholder="portrait | lookbook | wedding" />') + '</div>' +
         '<p class="sec-f">Dùng trong lời chào, tin nhắn mẫu, báo giá, báo cáo và mục Ảnh của Xèo.</p>';
+      h += '<p class="sec-s">Giao diện</p><div class="list"><div style="padding:12px 16px;"><div class="seg" id="themeSeg">' +
+        '<button type="button" data-th="elf"' + (c.theme !== 'rose' ? ' class="on"' : '') + '>Pearl Sapphire Blue</button><button type="button" data-th="rose"' + (c.theme === 'rose' ? ' class="on"' : '') + '>Hồng đất</button></div></div>' +
+        '<label class="row" style="cursor:pointer;"><span class="txt"><span class="t1" style="display:block;">Sticker &amp; câu vui mỗi ngày</span><span class="t2" style="display:block;">Sticker E.L.F., câu nói hôm nay, ăn mừng khi xong việc</span></span><input type="checkbox" class="switch" id="funSwitch"' + (c.fun ? ' checked' : '') + ' /></label></div>' +
+        '<p class="sec-f">Pearl Sapphire Blue là màu fan của Super Junior.</p>';
       h += '<p class="sec-s">Bảng giá gói chụp</p><div class="list">' +
         TYPES.filter(function(t){ return t !== 'Khác'; }).map(function(t){ return money('prices.' + t, t, c.prices[t]); }).join('') + '</div>' +
         '<p class="sec-f">Thêm buổi chụp mới sẽ tự điền giá theo gói. Máy tính giá ở Phòng Đón Khách cũng dùng bảng này. Để trống gói nào thì gói đó không hiện trong máy tính giá.</p>';
@@ -1783,6 +2013,10 @@
       });
       $$('[data-eq]', b).forEach(function(x){ x.addEventListener('click', function(){ openCfgItem('eq', x.getAttribute('data-eq')); }); });
       $$('[data-fx]', b).forEach(function(x){ x.addEventListener('click', function(){ openCfgItem('fx', x.getAttribute('data-fx')); }); });
+      $$('#themeSeg button', b).forEach(function(x){ x.addEventListener('click', function(){
+        state.cfg.theme = x.getAttribute('data-th'); $$('#themeSeg button', b).forEach(function(y){ y.classList.toggle('on', y === x); }); renderAll();
+      }); });
+      var fs2 = $('#funSwitch', b); if (fs2) fs2.addEventListener('change', function(){ state.cfg.fun = fs2.checked; renderAll(); if (fs2.checked) celebrate('Chào E.L.F.!', 'elf'); });
       var rd = $('#recDep', b);
       if (rd) rd.addEventListener('click', function(){
         if (recordedThisMonth(DEP_NOTE)){ toast('Tháng này đã ghi khấu hao rồi', 'warn'); return; }
@@ -1855,6 +2089,9 @@
         } });
     }
     $('#settingsRow').addEventListener('click', openSettings);
+    $('#quoteNext').addEventListener('click', function(){ quoteOffset++; renderQuote(); });
+    $('#quoteStk').addEventListener('click', function(){ quoteOffset++; renderQuote(); });
+    $('#quoteCopy').addEventListener('click', function(){ copyText($('#quoteText').textContent, 'Đã chép câu nói — gửi bạn bè cười chung'); });
     renderAll();
     </script>
 

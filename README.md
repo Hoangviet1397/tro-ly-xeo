@@ -60,6 +60,23 @@ Gõ tới đâu tự lưu tới đó.
 - Cài đặt nằm chung trong bản sao lưu JSON; "Xoá dữ liệu" không xoá cài đặt.
 - **Instagram @ và giới thiệu ngắn:** dùng cho mục Ảnh của Xèo, chân trang và tin nhắn mẫu cho khách hỏi giá.
 
+## Vui mỗi ngày (E.L.F. mode)
+
+- **Câu của hôm nay** trên màn Hôm nay: mỗi ngày một câu vui về nghề chụp ảnh và Super Junior,
+  bấm "Câu khác" hoặc chạm sticker để đổi, "Chép gửi bạn" để gửi.
+- **Sticker E.L.F. tự vẽ** (nhân vật tròn màu Pearl Sapphire Blue: vương miện, lightstick, máy ảnh,
+  tim, mũ tiệc, ngủ). Không dùng ảnh hay sticker chính thức của nhóm vì vướng bản quyền.
+- Sticker bật lên ăn mừng khi chuẩn bị đủ đồ, giao ảnh, xong job, khách trả đủ tiền.
+- Hỏi trợ lý về Suju (tên thành viên, "suju", "E.L.F.") là được trả lời vui.
+- Cài đặt → Giao diện: chọn màu **Pearl Sapphire Blue** (mặc định) hoặc **Hồng đất**,
+  và bật/tắt sticker & câu vui.
+
+## Chuẩn bị đồ
+
+- Danh sách riêng cho từng buổi chụp sắp tới (chọn ở hàng nút trên cùng) — buổi sau tự có
+  danh sách mới, khỏi phải bỏ tick.
+- Nút **Làm mới** bỏ tick hết; **Thêm món** để bổ sung đồ riêng của Xèo (có nút xoá cho món tự thêm).
+
 ## Ảnh trong app
 
 Ảnh đầu trang và mục **Ảnh của Xèo** là ảnh Xèo chụp, lấy từ Instagram

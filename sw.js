@@ -1,7 +1,7 @@
 /* Service worker cho Trợ lý Xèo trên GitHub Pages (https).
    Chỉ lưu app vào máy để mở offline sau lần đầu.
    Không đăng ký khi mở file offline (file://) — xem index.html. */
-var CACHE = 'tro-ly-xeo-v3';
+var CACHE = 'tro-ly-xeo-v4';
 var ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', function (event) {
