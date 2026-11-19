@@ -51,6 +51,10 @@ Gõ tới đâu tự lưu tới đó.
 - **Tên gọi, tên studio:** dùng trong lời chào, tin nhắn mẫu, báo giá, báo cáo.
 - **Bảng giá gói** (Portrait, Couple, Wedding, Lookbook, Event): thêm job mới tự điền
   giá theo gói; máy tính giá ở Phòng Đón Khách dùng bảng này.
+- **Bảng giá film:** mỗi job có ô "Chụp bằng" (Digital / Film / Cả hai). Giá film
+  điền riêng từng gói trong Cài đặt (để 0 là chưa đặt giá — tạo job film sẽ để
+  trống giá để tự gõ); job "Cả hai" cộng giá digital + giá film. Tiền cọc tính
+  theo tổng giá job đã lưu như cũ.
 - **Phụ phí:** thêm giờ, thêm địa điểm, retouch mỗi ảnh, album.
 - **% cọc** (báo giá + tin nhắn mẫu) và **số ngày giao ảnh** (hạn giao tự điền
   sau ngày chụp).
