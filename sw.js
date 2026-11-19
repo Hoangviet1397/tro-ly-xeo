@@ -3,7 +3,7 @@
    - Có bản mới trên GitHub: tải sẵn vào bộ nhớ mới, CHỜ Xèo bấm "Cập nhật" (tin nhắn SKIP_WAITING) mới chuyển.
    - Chỉ xử lý file của chính app; lượt gọi tới Google đi thẳng, không qua đây.
    - Không đăng ký khi mở file offline (file://) — xem index.html. */
-var CACHE = 'tro-ly-xeo-v16';
+var CACHE = 'tro-ly-xeo-v17';
 var ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', function (event) {

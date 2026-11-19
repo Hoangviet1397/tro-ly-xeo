@@ -1774,6 +1774,7 @@
       $$('#txSeg button').forEach(function(x){ x.classList.toggle('on', x === c); });
       renderMoney();
     }); });
+    var profitShowAll = false;
     function renderMoney(){
       var sThu = sum(monthTxs('thu')), sChi = sum(monthTxs('chi'));
       var mm = parseD(dstr(0)); $('#moneyEyebrow').textContent = 'Tháng ' + (mm.getMonth()+1) + ', ' + mm.getFullYear();
@@ -1783,11 +1784,17 @@
         tile({key:'loi', c:'teal', icon:'coin', label:'Lời tháng này', parts:fmtParts(sThu - sChi)}) +
         tile({key:'owe', c:'orange', icon:'wallet', label:'Khách còn thiếu', parts:fmtParts(totalOwe())});
       bindTiles($('#moneyStats'));
-      $('#jobProfit').innerHTML = state.jobs.length ? sortJobs(state.jobs).map(function(j){
+      /* Nhiều job (> 6): mặc định chỉ hiện job đang chạy, job đã xong gom vào nút "Xem thêm" — Sổ thu chi đỡ bị đẩy xuống xa. */
+      var pjAll = sortJobs(state.jobs), pjDone = pjAll.filter(function(j){ return j.stage === 'Xong'; }).length;
+      var pjFold = !profitShowAll && pjAll.length > 6 && pjDone > 0;
+      var pjList = pjFold ? pjAll.filter(function(j){ return j.stage !== 'Xong'; }) : pjAll;
+      $('#jobProfit').innerHTML = (state.jobs.length ? pjList.map(function(j){
         var t = jobThu(j.id), c = jobChi(j.id), owe = jobOwe(j), p = t - c;
         return '<button type="button" class="row" data-job="' + j.id + '">' + typeIcon(j.type) + '<span class="txt"><span class="t1 b clip" style="display:block;">' + esc(j.client) + '</span><span class="t2" style="display:block;">Thu ' + fmtTiny(t) + ' · Chi ' + fmtTiny(c) + (owe && j.stage !== 'Xong' ? ' · <span class="red">thiếu ' + fmtTiny(owe) + '</span>' : '') + '</span></span>' +
           (p === 0 ? '<span class="val num">0₫</span>' : '<span class="val num b ' + (p > 0 ? 'green' : 'red') + '" style="font-size:17px;">' + (p > 0 ? '+' : '−') + esc(fmtShort(Math.abs(p))) + '</span>') + I('chev').replace('<svg', '<svg class="chev"') + '</button>';
-      }).join('') : '<div class="empty-row muted">Chưa có job nào.</div>';
+      }).join('') : '<div class="empty-row muted">Chưa có job nào.</div>') +
+        (pjFold ? '<button type="button" class="row" id="profitMore"><span class="txt t1" style="color:var(--accent);">Xem thêm ' + pjDone + ' job đã xong</span>' + I('chev').replace('<svg', '<svg class="chev"') + '</button>' : '');
+      var pm = $('#profitMore'); if (pm) pm.addEventListener('click', function(){ profitShowAll = true; renderMoney(); });
       var list = state.txs.slice().sort(function(a,b){ return a.date < b.date ? 1 : (a.date > b.date ? -1 : (+b.id) - (+a.id)); }).filter(function(t){
         if (txFilter === 'thu') return t.kind === 'thu';
         if (txFilter === 'chi') return t.kind === 'chi';
